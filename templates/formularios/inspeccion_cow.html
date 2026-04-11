@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspección COW - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Mantenciones COW</h1>
+            <a href="{{ url_for('menu') }}" class="volver-btn">← Volver al Menú</a>
+        </div>
+
+        {% if mensaje %}
+            <div class="alert-success">{{ mensaje }}</div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+                        <!-- ==================== DATOS PRINCIPALES ==================== -->
+            <fieldset>
+                <legend>📋 Datos Principales</legend>
+                
+                <div class="form-group">
+                    {{ form.responsable.label }}
+                    {{ form.responsable(class="form-control") }}
+                    {% for error in form.responsable.errors %}
+                        <span class="error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.nombre_sitio.label }}
+                    {{ form.nombre_sitio(class="form-control") }}
+                    {% for error in form.nombre_sitio.errors %}
+                        <span class="error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha *</label>
+                    <input type="date" class="form-control" name="fecha" value="{{ fecha_iso }}" required>
+                    <small id="turno-info">{{ estado_turno }}</small>
+                </div>
+
+                <script>
+                    // Función para actualizar el turno cuando cambia la fecha
+                document.addEventListener('DOMContentLoaded', function() {
+                const fechaInput = document.querySelector('input[name="fecha"]');
+                const turnoInfo = document.getElementById('turno-info');
+        
+                if (fechaInput) {
+                    fechaInput.addEventListener('change', function() {
+                    const fechaSeleccionada = this.value;
+                
+                // Enviar la fecha al servidor mediante fetch para obtener el nuevo turno
+                    fetch('/calcular_turno', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({fecha: fechaSeleccionada})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (data.estado_turno) {
+                        turnoInfo.textContent = data.estado_turno;
+                    }
+                    })
+                    .catch(error => console.error('Error:', error));
+                    });
+                    }
+                    });
+                </script>
+
+                    <div class="form-group">
+                        {{ form.horometro.label }}
+                        {{ form.horometro(class="form-control") }}
+                        {% for error in form.horometro.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.hora_inicio.label }}
+                        {{ form.hora_inicio(class="form-control", type="time", step="60") }}
+                        {% for error in form.hora_inicio.errors %}
+                    <span class="error">{{ error }}</span>
+                        {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.hora_termino.label }}
+                    {{ form.hora_termino(class="form-control", type="time", step="60") }}
+                    {% for error in form.hora_termino.errors %}
+                    <span class="error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                </div>
+            </fieldset>
+
+                        <!-- ==================== GRUPO ELECTRÓGENO CUMMINS Y ESTANQUE DE COMBUSTIBLE ==================== -->
+            <fieldset>
+                <legend>⚡ Grupo Electrógeno Cummins y Estanque de Combustible</legend>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.horas_funcionamiento.label }}
+                        {{ form.horas_funcionamiento(class="form-control") }}
+                        {% for error in form.horas_funcionamiento.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.cantidad_arranques.label }}
+                        {{ form.cantidad_arranques(class="form-control") }}
+                        {% for error in form.cantidad_arranques.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.nivel_aceite.label }}
+                        {{ form.nivel_aceite(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.nivel_combustible.label }}
+                        {{ form.nivel_combustible(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.nivel_refrigerante.label }}
+                        {{ form.nivel_refrigerante(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.proxima_mantencion.label }}
+                        {{ form.proxima_mantencion(class="form-control") }}
+                        {% for error in form.proxima_mantencion.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_ge_principal.label }}
+                        {{ form.estado_ge_principal(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.uso_ge_auxiliar.label }}
+                        {{ form.uso_ge_auxiliar(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.limpieza_ge_interior.label }}
+                        {{ form.limpieza_ge_interior(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.limpieza_radiador.label }}
+                        {{ form.limpieza_radiador(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.sistema_combustible.label }}
+                        {{ form.sistema_combustible(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.arranque_automatico.label }}
+                        {{ form.arranque_automatico(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.limpieza_interior.label }}
+                        {{ form.limpieza_interior(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.limpieza_exterior.label }}
+                        {{ form.limpieza_exterior(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.cable_5p_4p.label }}
+                        {{ form.cable_5p_4p(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.adaptador_ge_aux.label }}
+                        {{ form.adaptador_ge_aux(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.observaciones_ge.label }}
+                    {{ form.observaciones_ge(class="form-control", rows="3", placeholder="Ej: Interior de generador con aceite derramado, daño estructura de generador...") }}
+                </div>
+
+                <!-- Sección de Fotografías -->
+                <div class="form-group">
+                    <label>📸 Fotografías de respaldo</label>
+                    <div class="fotos-row">
+                        <div class="foto-item">
+                            <label>Foto 1</label>
+                            <input type="file" name="foto_1" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto 2</label>
+                            <input type="file" name="foto_2" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto 3</label>
+                            <input type="file" name="foto_3" accept="image/*" class="form-control">
+                        </div>
+                    </div>
+                    <small>Seleccione hasta 3 imágenes como evidencia de la inspección</small>
+                </div>
+            </fieldset>
+
+            <!-- ==================== RACK ENERGÍA, TELECOM Y BATERÍAS ==================== -->
+            <fieldset>
+                <legend>🔋 Rack Energía, Telecom y Baterías</legend>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.limpieza_rack_energia.label }}
+                        {{ form.limpieza_rack_energia(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estado_planta_vertiv.label }}
+                        {{ form.estado_planta_vertiv(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.rectificador_n1.label }}
+                        {{ form.rectificador_n1(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.rectificador_n2.label }}
+                        {{ form.rectificador_n2(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.rectificador_n3.label }}
+                        {{ form.rectificador_n3(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_air_scale.label }}
+                        {{ form.estado_air_scale(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estado_alarmas.label }}
+                        {{ form.estado_alarmas(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_7250_ixr.label }}
+                        {{ form.estado_7250_ixr(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estado_fpfh.label }}
+                        {{ form.estado_fpfh(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.conversor_solar_n1.label }}
+                        {{ form.conversor_solar_n1(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.conversor_solar_n2.label }}
+                        {{ form.conversor_solar_n2(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.limpieza_rack_baterias.label }}
+                        {{ form.limpieza_rack_baterias(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estado_baterias.label }}
+                        {{ form.estado_baterias(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_inversor.label }}
+                        {{ form.estado_inversor(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estado_ventiladores.label }}
+                        {{ form.estado_ventiladores(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.limpieza_rack_telecom.label }}
+                    {{ form.limpieza_rack_telecom(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.observaciones_rack.label }}
+                    {{ form.observaciones_rack(class="form-control", rows="3", placeholder="Ok") }}
+                </div>
+
+                                <!-- Fotografías de respaldo - Rack Energía -->
+                <div class="form-group">
+                    <label>📸 Fotografías de respaldo</label>
+                    <div class="fotos-row">
+                        <div class="foto-item">
+                            <label>Foto 1</label>
+                            <input type="file" name="foto_rack_1" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto 2</label>
+                            <input type="file" name="foto_rack_2" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto 3</label>
+                            <input type="file" name="foto_rack_3" accept="image/*" class="form-control">
+                        </div>
+                    </div>
+                    <small>Seleccione hasta 3 imágenes del rack energía y telecomunicaciones</small>
+                </div>
+
+            </fieldset>
+
+            <!-- ==================== ESTRUCTURAS, PANELES SOLARES, NEUMÁTICOS ==================== -->
+            <fieldset>
+                <legend>🏗️ Estructuras, Paneles Solares, Piolas de Viento, Neumáticos y otros</legend>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.limpieza_paneles.label }}
+                        {{ form.limpieza_paneles(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estructura_paneles.label }}
+                        {{ form.estructura_paneles(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.cantidad_cunas.label }}
+                        {{ form.cantidad_cunas(class="form-control", placeholder="Ej: 4") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.checkpoints.label }}
+                        {{ form.checkpoints(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.presion_neumaticos.label }}
+                        {{ form.presion_neumaticos(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.estado_torre.label }}
+                        {{ form.estado_torre(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_piolas_viento.label }}
+                        {{ form.estado_piolas_viento(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.nivelacion_carro.label }}
+                        {{ form.nivelacion_carro(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.gatas_posicionamiento.label }}
+                        {{ form.gatas_posicionamiento(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.manivelas_izaje.label }}
+                        {{ form.manivelas_izaje(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.observaciones_estructuras.label }}
+                    {{ form.observaciones_estructuras(class="form-control", rows="3") }}
+                </div>
+
+                <!-- Fotografías de respaldo - Estructuras -->
+                <div class="form-group">
+                    <label>📸 Fotografías de respaldo</label>
+                    <div class="fotos-row">
+                        <div class="foto-item">
+                            <label>Foto 1</label>
+                            <input type="file" name="foto_estructuras_1" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto 2</label>
+                            <input type="file" name="foto_estructuras_2" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto 3</label>
+                            <input type="file" name="foto_estructuras_3" accept="image/*" class="form-control">
+                        </div>
+                    </div>
+                    <small>Seleccione hasta 3 imágenes de estructuras, paneles y neumáticos</small>
+                </div>
+            </fieldset>
+                        <!-- ==================== LEVANTAMIENTO DE FOTOGRAFÍAS ==================== -->
+            <fieldset>
+                <legend>📸 Levantamiento de Fotografías</legend>
+                
+                <div class="fotos-grid">
+                    <!-- Aquí van los 33 items -->
+                    <!-- Ejemplo de cada item: -->
+                    <div class="foto-item">
+                        <label>1. Fotografía del estado del sitio previo al comienzo de trabajos (recordar llamar a NOC informando el ingreso):</label>
+                        <input type="file" name="foto_1" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>2. Fotografía del panel de control del generador donde se observa el indicador de modo automático encendido:</label>
+                        <input type="file" name="foto_2" accept="image/*" class="form-control">
+                        <input type="file" name="foto_34" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>3. Ingrese fotografía de plan de mantenimiento del generador:</label>
+                        <input type="file" name="foto_3" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>4. Fotografía del nivel de aceite:</label>
+                        <input type="file" name="foto_4" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>5. Fotografía del nivel de combustible:</label>
+                        <input type="file" name="foto_5" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>6. Foto del refrigerante del generador:</label>
+                        <input type="file" name="foto_6" accept="image/*" class="form-control">
+                    </div>
+                        <div class="foto-item">
+                        <label>7. Ingresar fotografia del estado inicial de planta vertiv:</label>
+                        <input type="file" name="foto_7" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>8. Fotografía de la pantalla de la planta rectificadora donde se observa la entrada de corriente alterna:</label>
+                        <input type="file" name="foto_8" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>9. Ingresar fotografia del estado de los conversores de planta vertiv:</label>
+                        <input type="file" name="foto_9" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>10. Ingresar fotografia del estado de los rectificadores de planta vertiv:</label>
+                        <input type="file" name="foto_10" accept="image/*" class="form-control">
+                    </div>
+                        <div class="foto-item">
+                        <label>11. Ingresar fotografía del voltaje de salida dc, todo lo que alimenta la vertiv:</label>
+                        <input type="file" name="foto_11" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>12. Ingresar fotografia del estado de carga de bateria planta vertiv (a):</label>
+                        <input type="file" name="foto_12" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>13. Ingresar fotografia del estado de carga de bateria planta vertiv (b):</label>
+                        <input type="file" name="foto_13" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>14. Fotografía del rack de energía antes:</label>
+                        <input type="file" name="foto_14" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>15. Fotografía del rack de energía después:</label>
+                        <input type="file" name="foto_15" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>16. Fotografía del rack de telecomunicaciones antes:</label>
+                        <input type="file" name="foto_16" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>17. Fotografía del rack de telecomunicaciones después:</label>
+                        <input type="file" name="foto_17" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>18. Ingresar fotografía filtro IXR antes:</label>
+                        <input type="file" name="foto_18" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>19. Ingresar fotografía filtro IXR después:</label>
+                        <input type="file" name="foto_19" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>20. Fotografía de rack de baterías N°1 antes:</label>
+                        <input type="file" name="foto_20" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>21. Fotografía de rack de baterías N°1 después:</label>
+                        <input type="file" name="foto_21" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>22. Fotografía de rack de baterías N°2 antes:</label>
+                        <input type="file" name="foto_22" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>23. Fotografía de rack de baterías N°2 después:</label>
+                        <input type="file" name="foto_23" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>24. Fotografía de paneles solares antes:</label>
+                        <input type="file" name="foto_24" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>25. Fotografía de paneles solares después:</label>
+                        <input type="file" name="foto_25" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>26. Fotografía de estructura torre:</label>
+                        <input type="file" name="foto_26" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>27. Ingresar fotografía de la antena:</label>
+                        <input type="file" name="foto_27" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>28. Fotografía de vientos (a):</label>
+                        <input type="file" name="foto_28" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>29. Fotografía de vientos (b):</label>
+                        <input type="file" name="foto_29" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>30. Fotografía de vientos (c):</label>
+                        <input type="file" name="foto_30" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>31. Ingresar fotografía de neumáticos (a):</label>
+                        <input type="file" name="foto_31" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>32. Ingresar fotografía de neumáticos (b):</label>
+                        <input type="file" name="foto_32" accept="image/*" class="form-control">
+                    </div>
+                    <div class="foto-item">
+                        <label>33. Fotografía del sitio al término de los trabajos (Recordar llamar a NOC, informando la salida del sitio):</label>
+                        <input type="file" name="foto_33" accept="image/*" class="form-control">
+                    </div>
+                </div>
+            </fieldset>
+                        <!-- ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ==================== -->
+            <fieldset>
+                <legend>🔧 Levantamiento fotografías de mejoras</legend>
+                
+                <div class="mejoras-grid">
+                    <!-- Mejora 1 -->
+                    <div class="mejora-item">
+                        <label>Descripción</label>
+                        <input type="text" name="descripcion_mejora_1" class="form-control" placeholder="Describa la mejora realizada">
+                        <label>Fotografía de mejora</label>
+                        <input type="file" name="foto_mejora_1" accept="image/*" class="form-control">
+                    </div>
+                    
+                    <!-- Mejora 2 -->
+                    <div class="mejora-item">
+                        <label>Descripción</label>
+                        <input type="text" name="descripcion_mejora_2" class="form-control" placeholder="Describa la mejora realizada">
+                        <label>Fotografía de mejora</label>
+                        <input type="file" name="foto_mejora_2" accept="image/*" class="form-control">
+                    </div>
+                    
+                    <!-- Mejora 3 -->
+                    <div class="mejora-item">
+                        <label>Descripción</label>
+                        <input type="text" name="descripcion_mejora_3" class="form-control" placeholder="Describa la mejora realizada">
+                        <label>Fotografía de mejora</label>
+                        <input type="file" name="foto_mejora_3" accept="image/*" class="form-control">
+                    </div>
+                    
+                    <!-- Mejora 4 -->
+                    <div class="mejora-item">
+                        <label>Descripción</label>
+                        <input type="text" name="descripcion_mejora_4" class="form-control" placeholder="Describa la mejora realizada">
+                        <label>Fotografía de mejora</label>
+                        <input type="file" name="foto_mejora_4" accept="image/*" class="form-control">
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ==================== BOTÓN ENVIAR ==================== -->
+            <div class="form-group">
+                {{ form.submit(class="btn-submit") }}
+            </div>
+        </form>
+    </div>
+</body>
+</html>

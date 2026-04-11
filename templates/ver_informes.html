@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ver Informes - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Informes</h1>
+            <p>Usuario: {{ usuario }}</p>
+            <a href="{{ url_for('menu') }}" class="volver-btn">← Volver</a>
+        </div>
+        
+        {% if inspecciones %}
+            <table class="tabla-informes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Sitio</th>
+                        <th>Responsable</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ins in inspecciones %}
+                    <tr>
+                        <td>{{ ins.id }}</td>
+                        <td>{{ ins.fecha }} (Día {{ ins.dia_turno }})</td>
+                        <td>{{ ins.nombre_sitio[:50] }}...</td>
+                        <td>{{ ins.responsable }}</td>
+                        <td>
+                            <span class="estado {{ ins.estado }}">
+                                {{ ins.estado|upper }}
+                            </span>
+                        </td>
+                        <td>
+    <a href="{{ url_for('ver_informe', id=ins.id) }}" class="btn-ver">👁️</a>
+    <a href="{{ url_for('editar_informe', id=ins.id) }}" class="btn-editar">✏️</a>
+    <a href="{{ url_for('borrar_informe', id=ins.id) }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">🗑️</a>
+    {% if rol == 'supervisor' and ins.estado == 'pendiente' %}
+        <a href="{{ url_for('aprobar_informe', id=ins.id) }}" class="btn-aprobar">✅</a>
+        <a href="{{ url_for('rechazar_informe', id=ins.id) }}" class="btn-rechazar">❌</a>
+    {% endif %}
+</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No hay informes registrados.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

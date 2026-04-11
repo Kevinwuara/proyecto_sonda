@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>App SONDA</h1>
+        <p>Bienvenido, {{ usuario }}</p>
+        <a href="{{ url_for('menu') }}">Ir al Menú de Informes</a>
+        <br>
+        <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+    </div>
+</body>
+</html>

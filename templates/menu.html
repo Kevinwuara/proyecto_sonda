@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú de Informes - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>App SONDA</h1>
+            <p>Usuario: {{ usuario }}</p>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar Sesión</a>
+        </div>
+
+        <div class="menu-principal">
+            <h2>Formularios de Inspección</h2>
+            <div class="botones">
+                <a href="{{ url_for('inspeccion_cow') }}" class="btn">Inspección Diaria COW</a>
+                <a href="{{ url_for('inspeccion_ge') }}" class="btn">Inspección GE Auxiliar</a>
+                <a href="{{ url_for('desplazamiento') }}" class="btn">Desplazamiento COW</a>
+                <a href="{{ url_for('monitoreo') }}" class="btn">Monitoreo Noche</a>
+            </div>
+        </div>
+
+        <div class="menu-reportes">
+            <h2>Reportes</h2>
+            <div class="botones">
+                <a href="{{ url_for('ver_informes') }}" class="btn btn-secundario">Ver Informes Guardados</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

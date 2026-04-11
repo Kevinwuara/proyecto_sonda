@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Informe - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Detalle Inspección COW #{{ inspeccion.id }}</h1>
+            <p>Uusuario: {{ usuario }} </p>
+            <a href="{{ url_for('ver_informes') }}" class="volver-btn">← Volver a Informes</a>
+        </div>
+
+        <!-- Estado del informe -->
+        <div class="estado-banner {{ inspeccion.estado }}">
+            Estado: {{ inspeccion.estado|upper }}
+        </div>
+
+        <!-- ==================== DATOS PRINCIPALES ==================== -->
+        <fieldset>
+            <legend>📋 Datos Principales</legend>
+            <div class="detalle-grid">
+                <div><strong>Responsable:</strong> {{ inspeccion.responsable }}</div>
+                <div><strong>Nombre del Sitio:</strong> {{ inspeccion.nombre_sitio }}</div>
+                <div><strong>Horómetro (Valor Alto):</strong> {{ inspeccion.horometro }}</div>
+                <div><strong>Fecha:</strong> {{ inspeccion.fecha }} (Día {{ inspeccion.dia_turno }})</div>
+                <div><strong>Hora Inicio:</strong> {{ inspeccion.hora_inicio }}</div>
+                <div><strong>Hora Término:</strong> {{ inspeccion.hora_termino }}</div>
+            </div>
+        </fieldset>
+
+        <!-- ==================== GRUPO ELECTRÓGENO CUMMINS ==================== -->
+        <fieldset>
+            <legend>⚡ Grupo Electrógeno Cummins y Estanque de Combustible</legend>
+            <div class="detalle-grid">
+                <div><strong>Horas Funcionamiento (Valor Bajo):</strong> {{ inspeccion.horas_funcionamiento or '-' }}</div>
+                <div><strong>Cantidad de Arranques:</strong> {{ inspeccion.cantidad_arranques or '-' }}</div>
+                <div><strong>Nivel de Aceite:</strong> {{ inspeccion.nivel_aceite or '-' }}</div>
+                <div><strong>Nivel de Combustible:</strong> {{ inspeccion.nivel_combustible or '-' }}</div>
+                <div><strong>Nivel de Refrigerante:</strong> {{ inspeccion.nivel_refrigerante or '-' }}</div>
+                <div><strong>Próxima Mantención:</strong> {{ inspeccion.proxima_mantencion or '-' }}</div>
+                <div><strong>Estado de GE Principal:</strong> {{ inspeccion.estado_ge_principal or '-' }}</div>
+                <div><strong>Uso de GE Auxiliar:</strong> {{ inspeccion.uso_ge_auxiliar or '-' }}</div>
+                <div><strong>Limpieza GE Interior:</strong> {{ inspeccion.limpieza_ge_interior or '-' }}</div>
+                <div><strong>Limpieza Radiador:</strong> {{ inspeccion.limpieza_radiador or '-' }}</div>
+                <div><strong>Sistema Combustible:</strong> {{ inspeccion.sistema_combustible or '-' }}</div>
+                <div><strong>Arranque Automático:</strong> {{ inspeccion.arranque_automatico or '-' }}</div>
+                <div><strong>Limpieza Interior:</strong> {{ inspeccion.limpieza_interior or '-' }}</div>
+                <div><strong>Limpieza Exterior:</strong> {{ inspeccion.limpieza_exterior or '-' }}</div>
+                <div><strong>Cable 5p/4p GE Auxiliar:</strong> {{ inspeccion.cable_5p_4p or '-' }}</div>
+                <div><strong>Adaptador para GE Aux:</strong> {{ inspeccion.adaptador_ge_aux or '-' }}</div>
+            </div>
+            <div class="observaciones">
+                <strong>Observaciones:</strong><br>
+                {{ inspeccion.observaciones_ge or 'Sin observaciones' }}
+            </div>
+        </fieldset>
+        <!-- ==================== FOTOGRAFÍAS GE ==================== -->
+        <fieldset>
+            <legend>📸 Fotografías GE y Combustible</legend>
+            <div class="fotos-detalle">
+                <div class="foto-item">
+                    <strong>Foto 1:</strong>
+                    {% if inspeccion.foto_1 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_1) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+                <div class="foto-item">
+                    <strong>Foto 2:</strong>
+                    {% if inspeccion.foto_2 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_2) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+                <div class="foto-item">
+                    <strong>Foto 3:</strong>
+                    {% if inspeccion.foto_3 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_3) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- ==================== RACK ENERGÍA, TELECOM Y BATERÍAS ==================== -->
+        <fieldset>
+            <legend>🔋 Rack Energía, Telecom y Baterías</legend>
+            <div class="detalle-grid">
+                <div><strong>Limpieza Rack Energía:</strong> {{ inspeccion.limpieza_rack_energia or '-' }}</div>
+                <div><strong>Estado Planta Vertiv:</strong> {{ inspeccion.estado_planta_vertiv or '-' }}</div>
+                <div><strong>Rectificador N°1:</strong> {{ inspeccion.rectificador_n1 or '-' }}</div>
+                <div><strong>Rectificador N°2:</strong> {{ inspeccion.rectificador_n2 or '-' }}</div>
+                <div><strong>Rectificador N°3:</strong> {{ inspeccion.rectificador_n3 or '-' }}</div>
+                <div><strong>Estado Air Scale:</strong> {{ inspeccion.estado_air_scale or '-' }}</div>
+                <div><strong>Estado de Alarmas:</strong> {{ inspeccion.estado_alarmas or '-' }}</div>
+                <div><strong>Estado 7250-IXR:</strong> {{ inspeccion.estado_7250_ixr or '-' }}</div>
+                <div><strong>Estado FPFH:</strong> {{ inspeccion.estado_fpfh or '-' }}</div>
+                <div><strong>Conversor Solar N°1:</strong> {{ inspeccion.conversor_solar_n1 or '-' }}</div>
+                <div><strong>Conversor Solar N°2:</strong> {{ inspeccion.conversor_solar_n2 or '-' }}</div>
+                <div><strong>Limpieza Rack Baterías:</strong> {{ inspeccion.limpieza_rack_baterias or '-' }}</div>
+                <div><strong>Estado Baterías:</strong> {{ inspeccion.estado_baterias or '-' }}</div>
+                <div><strong>Estado Inversor:</strong> {{ inspeccion.estado_inversor or '-' }}</div>
+                <div><strong>Estado Ventiladores:</strong> {{ inspeccion.estado_ventiladores or '-' }}</div>
+                <div><strong>Limpieza Rack Telecom:</strong> {{ inspeccion.limpieza_rack_telecom or '-' }}</div>
+            </div>
+            <div class="observaciones">
+                <strong>Observaciones:</strong><br>
+                {{ inspeccion.observaciones_rack or 'Sin observaciones' }}
+            </div>
+        </fieldset>
+        <!-- ==================== FOTOGRAFÍAS RACK ENERGÍA ==================== -->
+        <fieldset>
+            <legend>📸 Fotografías Rack Energía y Telecom</legend>
+            <div class="fotos-detalle">
+                <div class="foto-item">
+                    <strong>Foto Rack 1:</strong>
+                    {% if inspeccion.foto_rack_1 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_rack_1) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+                <div class="foto-item">
+                    <strong>Foto Rack 2:</strong>
+                    {% if inspeccion.foto_rack_2 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_rack_2) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+                <div class="foto-item">
+                    <strong>Foto Rack 3:</strong>
+                    {% if inspeccion.foto_rack_3 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_rack_3) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- ==================== ESTRUCTURAS, PANELES SOLARES, NEUMÁTICOS ==================== -->
+        <fieldset>
+            <legend>🏗️ Estructuras, Paneles Solares, Piolas de Viento, Neumáticos y otros</legend>
+            <div class="detalle-grid">
+                <div><strong>Limpieza de Paneles:</strong> {{ inspeccion.limpieza_paneles or '-' }}</div>
+                <div><strong>Estructura de Paneles Solares:</strong> {{ inspeccion.estructura_paneles or '-' }}</div>
+                <div><strong>Cantidad de Cuñas:</strong> {{ inspeccion.cantidad_cunas or '-' }}</div>
+                <div><strong>Checkpoints:</strong> {{ inspeccion.checkpoints or '-' }}</div>
+                <div><strong>Presión de Neumáticos:</strong> {{ inspeccion.presion_neumaticos or '-' }}</div>
+                <div><strong>Estado Torre:</strong> {{ inspeccion.estado_torre or '-' }}</div>
+                <div><strong>Estado Piolas de Viento:</strong> {{ inspeccion.estado_piolas_viento or '-' }}</div>
+                <div><strong>Nivelación del Carro:</strong> {{ inspeccion.nivelacion_carro or '-' }}</div>
+                <div><strong>Gatas de Posicionamiento:</strong> {{ inspeccion.gatas_posicionamiento or '-' }}</div>
+                <div><strong>Manivelas Izaje de Gatas:</strong> {{ inspeccion.manivelas_izaje or '-' }}</div>
+            </div>
+            <div class="observaciones">
+                <strong>Observaciones:</strong><br>
+                {{ inspeccion.observaciones_estructuras or 'Sin observaciones' }}
+            </div>
+        </fieldset>
+        <!-- ==================== FOTOGRAFÍAS ESTRUCTURAS ==================== -->
+        <fieldset>
+            <legend>📸 Fotografías Estructuras</legend>
+            <div class="fotos-detalle">
+                <div class="foto-item">
+                    <strong>Foto Estructura 1:</strong>
+                    {% if inspeccion.foto_estructuras_1 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_estructuras_1) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+                <div class="foto-item">
+                    <strong>Foto Estructura 2:</strong>
+                    {% if inspeccion.foto_estructuras_2 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_estructuras_2) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+                <div class="foto-item">
+                    <strong>Foto Estructura 3:</strong>
+                    {% if inspeccion.foto_estructuras_3 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_estructuras_3) }}" class="img-preview">
+                    {% else %}
+                        <p>No hay foto</p>
+                    {% endif %}
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Botones de acción -->
+        <div class="acciones-detalle">
+            <a href="{{ url_for('editar_informe', id=inspeccion.id) }}" class="btn-editar">Editar Informe</a>
+            <a href="{{ url_for('borrar_informe', id=inspeccion.id) }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">Borrar Informe</a>
+            {% if rol == 'supervisor' and inspeccion.estado == 'pendiente' %}
+                <a href="{{ url_for('aprobar_informe', id=inspeccion.id) }}" class="btn-aprobar">Aprobar</a>
+                <a href="{{ url_for('rechazar_informe', id=inspeccion.id) }}" class="btn-rechazar">Rechazar</a>
+            {% endif %}
+            <a href="{{ url_for('ver_informes') }}" class="btn-volver">Volver a Informes</a>
+        </div>
+    </div>
+</body>
+</html>
