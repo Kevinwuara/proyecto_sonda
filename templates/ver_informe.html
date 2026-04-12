@@ -195,6 +195,43 @@
                 </div>
             </div>
         </fieldset>
+                        <!-- ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (33 PUNTOS) ==================== -->
+        <fieldset>
+            <legend>📸 Levantamiento de Fotografías (33 Puntos)</legend>
+            <div class="fotos-grid-33">
+                {% for i in range(1, 34) %}
+                <div class="foto-item">
+                    <strong>Punto {{ i }}:</strong>
+                    {% set foto = inspeccion['foto_levantamiento_' ~ i] %}
+                    {% if foto %}
+                        <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ==================== -->
+        <fieldset>
+            <legend>🔧 Levantamiento Fotografías de Mejoras</legend>
+            <div class="mejoras-grid">
+                {% for i in range(1, 5) %}
+                <div class="mejora-item">
+                    <strong>Mejora {{ i }}</strong>
+                    {% set foto = inspeccion['foto_mejora_' ~ i] %}
+                    {% set desc = inspeccion['descripcion_mejora_' ~ i] %}
+                    <p><em>Descripción:</em> {{ desc or 'Sin descripción' }}</p>
+                    {% if foto %}
+                        <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
 
         <!-- Botones de acción -->
         <div class="acciones-detalle">

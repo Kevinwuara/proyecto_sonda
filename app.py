@@ -109,7 +109,52 @@ class InspeccionCOW(db.Model):
     foto_estructuras_1 = db.Column(db.String(200), nullable=True)
     foto_estructuras_2 = db.Column(db.String(200), nullable=True)
     foto_estructuras_3 = db.Column(db.String(200), nullable=True)
+
+    # ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (33 puntos) ====================
+    foto_levantamiento_1 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_2 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_3 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_4 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_5 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_6 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_7 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_8 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_9 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_10 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_11 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_12 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_13 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_14 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_15 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_16 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_17 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_18 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_19 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_20 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_21 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_22 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_23 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_24 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_25 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_26 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_27 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_28 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_29 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_30 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_31 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_32 = db.Column(db.String(200), nullable=True)
+    foto_levantamiento_33 = db.Column(db.String(200), nullable=True)
     
+    # ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ====================
+    foto_mejora_1 = db.Column(db.String(200), nullable=True)
+    descripcion_mejora_1 = db.Column(db.String(500), nullable=True)
+    foto_mejora_2 = db.Column(db.String(200), nullable=True)
+    descripcion_mejora_2 = db.Column(db.String(500), nullable=True)
+    foto_mejora_3 = db.Column(db.String(200), nullable=True)
+    descripcion_mejora_3 = db.Column(db.String(500), nullable=True)
+    foto_mejora_4 = db.Column(db.String(200), nullable=True)
+    descripcion_mejora_4 = db.Column(db.String(500), nullable=True)
+
     # Estado y control
     estado = db.Column(db.String(20), default='pendiente')  # pendiente, aprobado, rechazado
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
@@ -268,6 +313,46 @@ def inspeccion_cow():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_estructuras.append(filename)
+
+        # Procesar fotos de Levantamiento de Fotografías (33 puntos)
+        fotos_levantamiento = []
+        for i in range(1, 34):
+            campo_foto = f'foto_lev_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_lev_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_levantamiento.append(filename)
+                else:
+                    fotos_levantamiento.append(None)
+            else:
+                fotos_levantamiento.append(None)
+        
+        # Procesar fotos de Mejoras (4 fotos con descripciones)
+        fotos_mejora = []
+        descripciones_mejora = []
+        for i in range(1, 5):
+            campo_foto = f'foto_mejora_{i}'
+            campo_desc = f'desc_mejora_{i}'
+            
+            # Descripción
+            desc = request.form.get(campo_desc, '')
+            descripciones_mejora.append(desc)
+            
+            # Foto
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_mejora_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_mejora.append(filename)
+                else:
+                    fotos_mejora.append(None)
+            else:
+                fotos_mejora.append(None)
         
         # ==================== GUARDAR EN BASE DE DATOS ====================
         usuario_actual = Usuario.query.filter_by(username=session['username']).first()
@@ -335,7 +420,51 @@ def inspeccion_cow():
             foto_estructuras_1=fotos_estructuras[0] if len(fotos_estructuras) > 0 else None,
             foto_estructuras_2=fotos_estructuras[1] if len(fotos_estructuras) > 1 else None,
             foto_estructuras_3=fotos_estructuras[2] if len(fotos_estructuras) > 2 else None,
+                        # ==================== FOTOS LEVANTAMIENTO ====================
+            foto_levantamiento_1=fotos_levantamiento[0] if len(fotos_levantamiento) > 0 and fotos_levantamiento[0] else None,
+            foto_levantamiento_2=fotos_levantamiento[1] if len(fotos_levantamiento) > 1 and fotos_levantamiento[1] else None,
+            foto_levantamiento_3=fotos_levantamiento[2] if len(fotos_levantamiento) > 2 and fotos_levantamiento[2] else None,
+            foto_levantamiento_4=fotos_levantamiento[3] if len(fotos_levantamiento) > 3 and fotos_levantamiento[3] else None,
+            foto_levantamiento_5=fotos_levantamiento[4] if len(fotos_levantamiento) > 4 and fotos_levantamiento[4] else None,
+            foto_levantamiento_6=fotos_levantamiento[5] if len(fotos_levantamiento) > 5 and fotos_levantamiento[5] else None,
+            foto_levantamiento_7=fotos_levantamiento[6] if len(fotos_levantamiento) > 6 and fotos_levantamiento[6] else None,
+            foto_levantamiento_8=fotos_levantamiento[7] if len(fotos_levantamiento) > 7 and fotos_levantamiento[7] else None,
+            foto_levantamiento_9=fotos_levantamiento[8] if len(fotos_levantamiento) > 8 and fotos_levantamiento[8] else None,
+            foto_levantamiento_10=fotos_levantamiento[9] if len(fotos_levantamiento) > 9 and fotos_levantamiento[9] else None,
+            foto_levantamiento_11=fotos_levantamiento[10] if len(fotos_levantamiento) > 10 and fotos_levantamiento[10] else None,
+            foto_levantamiento_12=fotos_levantamiento[11] if len(fotos_levantamiento) > 11 and fotos_levantamiento[11] else None,
+            foto_levantamiento_13=fotos_levantamiento[12] if len(fotos_levantamiento) > 12 and fotos_levantamiento[12] else None,
+            foto_levantamiento_14=fotos_levantamiento[13] if len(fotos_levantamiento) > 13 and fotos_levantamiento[13] else None,
+            foto_levantamiento_15=fotos_levantamiento[14] if len(fotos_levantamiento) > 14 and fotos_levantamiento[14] else None,
+            foto_levantamiento_16=fotos_levantamiento[15] if len(fotos_levantamiento) > 15 and fotos_levantamiento[15] else None,
+            foto_levantamiento_17=fotos_levantamiento[16] if len(fotos_levantamiento) > 16 and fotos_levantamiento[16] else None,
+            foto_levantamiento_18=fotos_levantamiento[17] if len(fotos_levantamiento) > 17 and fotos_levantamiento[17] else None,
+            foto_levantamiento_19=fotos_levantamiento[18] if len(fotos_levantamiento) > 18 and fotos_levantamiento[18] else None,
+            foto_levantamiento_20=fotos_levantamiento[19] if len(fotos_levantamiento) > 19 and fotos_levantamiento[19] else None,
+            foto_levantamiento_21=fotos_levantamiento[20] if len(fotos_levantamiento) > 20 and fotos_levantamiento[20] else None,
+            foto_levantamiento_22=fotos_levantamiento[21] if len(fotos_levantamiento) > 21 and fotos_levantamiento[21] else None,
+            foto_levantamiento_23=fotos_levantamiento[22] if len(fotos_levantamiento) > 22 and fotos_levantamiento[22] else None,
+            foto_levantamiento_24=fotos_levantamiento[23] if len(fotos_levantamiento) > 23 and fotos_levantamiento[23] else None,
+            foto_levantamiento_25=fotos_levantamiento[24] if len(fotos_levantamiento) > 24 and fotos_levantamiento[24] else None,
+            foto_levantamiento_26=fotos_levantamiento[25] if len(fotos_levantamiento) > 25 and fotos_levantamiento[25] else None,
+            foto_levantamiento_27=fotos_levantamiento[26] if len(fotos_levantamiento) > 26 and fotos_levantamiento[26] else None,
+            foto_levantamiento_28=fotos_levantamiento[27] if len(fotos_levantamiento) > 27 and fotos_levantamiento[27] else None,
+            foto_levantamiento_29=fotos_levantamiento[28] if len(fotos_levantamiento) > 28 and fotos_levantamiento[28] else None,
+            foto_levantamiento_30=fotos_levantamiento[29] if len(fotos_levantamiento) > 29 and fotos_levantamiento[29] else None,
+            foto_levantamiento_31=fotos_levantamiento[30] if len(fotos_levantamiento) > 30 and fotos_levantamiento[30] else None,
+            foto_levantamiento_32=fotos_levantamiento[31] if len(fotos_levantamiento) > 31 and fotos_levantamiento[31] else None,
+            foto_levantamiento_33=fotos_levantamiento[32] if len(fotos_levantamiento) > 32 and fotos_levantamiento[32] else None,
             
+            # ==================== FOTOS MEJORAS ====================
+            foto_mejora_1=fotos_mejora[0] if len(fotos_mejora) > 0 and fotos_mejora[0] else None,
+            descripcion_mejora_1=descripciones_mejora[0] if len(descripciones_mejora) > 0 else None,
+            foto_mejora_2=fotos_mejora[1] if len(fotos_mejora) > 1 and fotos_mejora[1] else None,
+            descripcion_mejora_2=descripciones_mejora[1] if len(descripciones_mejora) > 1 else None,
+            foto_mejora_3=fotos_mejora[2] if len(fotos_mejora) > 2 and fotos_mejora[2] else None,
+            descripcion_mejora_3=descripciones_mejora[2] if len(descripciones_mejora) > 2 else None,
+            foto_mejora_4=fotos_mejora[3] if len(fotos_mejora) > 3 and fotos_mejora[3] else None,
+            descripcion_mejora_4=descripciones_mejora[3] if len(descripciones_mejora) > 3 else None,
+
             estado='pendiente'
         )
         

@@ -521,3 +521,23 @@ small {
     border-radius: 5px;
     text-decoration: none;
 }
+
+/* Grid para 33 fotos */
+.fotos-grid-33 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* Grid para mejoras */
+.mejoras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.mejora-item {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
