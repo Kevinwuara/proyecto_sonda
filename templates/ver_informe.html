@@ -195,21 +195,306 @@
                 </div>
             </div>
         </fieldset>
-                        <!-- ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (33 PUNTOS) ==================== -->
+                                <!-- ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (33 PUNTOS) ==================== -->
         <fieldset>
             <legend>📸 Levantamiento de Fotografías (33 Puntos)</legend>
             <div class="fotos-grid-33">
-                {% for i in range(1, 34) %}
                 <div class="foto-item">
-                    <strong>Punto {{ i }}:</strong>
-                    {% set foto = inspeccion['foto_levantamiento_' ~ i] %}
-                    {% if foto %}
-                        <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="img-preview">
+                    <strong>1. Fotografía del estado del sitio previo al comienzo de trabajos (recordar llamar a NOC informando el ingreso):</strong>
+                    {% if inspeccion.foto_levantamiento_1 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_1) }}" class="img-preview">
                     {% else %}
                         <p>Sin foto</p>
                     {% endif %}
                 </div>
-                {% endfor %}
+                
+                <div class="foto-item">
+                    <strong>2. Fotografía del panel de control del generador donde se observa el indicador de modo automático encendido:</strong>
+                    {% if inspeccion.foto_levantamiento_2 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_2) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>3. Ingrese fotografía de plan de mantenimiento del generador:</strong>
+                    {% if inspeccion.foto_levantamiento_3 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_3) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>4. Fotografía del nivel de aceite:</strong>
+                    {% if inspeccion.foto_levantamiento_4 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_4) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>5. Fotografía del nivel de combustible:</strong>
+                    {% if inspeccion.foto_levantamiento_5 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_5) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>6. Foto del refrigerante del generador:</strong>
+                    {% if inspeccion.foto_levantamiento_6 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_6) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>7. Ingresar fotografía del estado inicial de planta vertiv:</strong>
+                    {% if inspeccion.foto_levantamiento_7 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_7) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>8. Fotografía de la pantalla de la planta rectificadora donde se observa la entrada de corriente alterna:</strong>
+                    {% if inspeccion.foto_levantamiento_8 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_8) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>9. Ingresar fotografía del estado de los conversores de planta vertiv:</strong>
+                    {% if inspeccion.foto_levantamiento_9 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_9) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>10. Ingresar fotografía del estado de los rectificadores de planta vertiv:</strong>
+                    {% if inspeccion.foto_levantamiento_10 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_10) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>11. Ingresar fotografía del voltaje de salida dc, todo lo que alimenta la vertiv:</strong>
+                    {% if inspeccion.foto_levantamiento_11 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_11) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>12. Ingresar fotografía del estado de carga de batería planta vertiv (a):</strong>
+                    {% if inspeccion.foto_levantamiento_12 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_12) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>13. Ingresar fotografía del estado de carga de batería planta vertiv (b):</strong>
+                    {% if inspeccion.foto_levantamiento_13 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_13) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>14. Fotografía del rack de energía antes:</strong>
+                    {% if inspeccion.foto_levantamiento_14 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_14) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>15. Fotografía del rack de energía después:</strong>
+                    {% if inspeccion.foto_levantamiento_15 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_15) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>16. Fotografía del rack de telecomunicaciones antes:</strong>
+                    {% if inspeccion.foto_levantamiento_16 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_16) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>17. Fotografía del rack de telecomunicaciones después:</strong>
+                    {% if inspeccion.foto_levantamiento_17 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_17) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>18. Ingresar fotografía filtro IXR antes:</strong>
+                    {% if inspeccion.foto_levantamiento_18 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_18) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>19. Ingresar fotografía filtro IXR después:</strong>
+                    {% if inspeccion.foto_levantamiento_19 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_19) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>20. Fotografía de rack de baterías N°1 antes:</strong>
+                    {% if inspeccion.foto_levantamiento_20 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_20) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>21. Fotografía de rack de baterías N°1 después:</strong>
+                    {% if inspeccion.foto_levantamiento_21 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_21) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>22. Fotografía de rack de baterías N°2 antes:</strong>
+                    {% if inspeccion.foto_levantamiento_22 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_22) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>23. Fotografía de rack de baterías N°2 después:</strong>
+                    {% if inspeccion.foto_levantamiento_23 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_23) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>24. Fotografía de paneles solares antes:</strong>
+                    {% if inspeccion.foto_levantamiento_24 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_24) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>25. Fotografía de paneles solares después:</strong>
+                    {% if inspeccion.foto_levantamiento_25 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_25) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>26. Fotografía de estructura torre:</strong>
+                    {% if inspeccion.foto_levantamiento_26 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_26) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>27. Ingresar fotografía de la antena:</strong>
+                    {% if inspeccion.foto_levantamiento_27 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_27) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>28. Fotografía de vientos (a):</strong>
+                    {% if inspeccion.foto_levantamiento_28 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_28) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>29. Fotografía de vientos (b):</strong>
+                    {% if inspeccion.foto_levantamiento_29 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_29) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>30. Fotografía de vientos (c):</strong>
+                    {% if inspeccion.foto_levantamiento_30 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_30) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>31. Ingresar fotografía de neumáticos (a):</strong>
+                    {% if inspeccion.foto_levantamiento_31 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_31) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>32. Ingresar fotografía de neumáticos (b):</strong>
+                    {% if inspeccion.foto_levantamiento_32 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_32) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                
+                <div class="foto-item">
+                    <strong>33. Fotografía del sitio al término de los trabajos (Recordar llamar a NOC, informando la salida del sitio):</strong>
+                    {% if inspeccion.foto_levantamiento_33 %}
+                        <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_levantamiento_33) }}" class="img-preview">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
             </div>
         </fieldset>
 
