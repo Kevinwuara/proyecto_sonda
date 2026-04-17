@@ -679,3 +679,15 @@ small {
 .close-modal:hover {
     color: #bbb;
 }
+
+.btn-pdf {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-pdf:hover {
+    background-color: #bb2d3b;
+}

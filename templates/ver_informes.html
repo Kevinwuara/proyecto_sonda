@@ -42,8 +42,9 @@
     <a href="{{ url_for('editar_informe', id=ins.id) }}" class="btn-editar">✏️</a>
     <a href="{{ url_for('borrar_informe', id=ins.id) }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">🗑️</a>
     {% if rol == 'supervisor' and ins.estado == 'pendiente' %}
-        <a href="{{ url_for('aprobar_informe', id=ins.id) }}" class="btn-aprobar">✅</a>
-        <a href="{{ url_for('rechazar_informe', id=ins.id) }}" class="btn-rechazar">❌</a>
+    <a href="{{ url_for('generar_pdf', id=ins.id) }}" class="btn-pdf" target="_blank">📄</a>
+    <a href="{{ url_for('aprobar_informe', id=ins.id) }}" class="btn-aprobar">✅</a>
+    <a href="{{ url_for('rechazar_informe', id=ins.id) }}" class="btn-rechazar">❌</a>
     {% endif %}
 </td>
                     </tr>

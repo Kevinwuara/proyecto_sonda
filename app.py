@@ -6,6 +6,16 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from forms_cow import InspeccionCOWForm
 from werkzeug.utils import secure_filename
 import os
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as ReportLabImage
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch, mm
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from io import BytesIO
+from flask import send_file
 
 # 1. PRIMERO crear la aplicación Flask
 app = Flask(__name__)
@@ -840,6 +850,94 @@ def borrar_informe(id):
     db.session.commit()
     
     return redirect(url_for('ver_informes'))
+
+@app.route('/generar_pdf/<int:id>')
+def generar_pdf(id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    inspeccion = InspeccionCOW.query.get_or_404(id)
+    usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+    
+    # Verificar permisos
+    if usuario_actual.rol != 'supervisor' and inspeccion.usuario_id != usuario_actual.id:
+        return "No tienes permiso para generar este PDF", 403
+    
+    # Crear buffer para PDF
+    buffer = BytesIO()
+    
+    # Crear documento PDF en orientación vertical
+    doc = SimpleDocTemplate(buffer, pagesize=letter, 
+                           topMargin=0.5*inch, bottomMargin=0.5*inch,
+                           leftMargin=0.5*inch, rightMargin=0.5*inch)
+    
+    # Estilos
+    styles = getSampleStyleSheet()
+    titulo_style = ParagraphStyle('TituloStyle', parent=styles['Heading1'], 
+                                   alignment=TA_CENTER, fontSize=16, textColor=colors.HexColor('#0033a0'))
+    subtitulo_style = ParagraphStyle('SubtituloStyle', parent=styles['Heading2'],
+                                      fontSize=12, textColor=colors.HexColor('#0033a0'))
+    normal_style = styles['Normal']
+    
+    # Contenido del PDF
+    elementos = []
+    
+    # Título principal
+    elementos.append(Paragraph("INSPECCIÓN DIARIA COW", titulo_style))
+    elementos.append(Spacer(1, 0.2*inch))
+    
+    # Datos Principales
+    elementos.append(Paragraph("DATOS PRINCIPALES", subtitulo_style))
+    elementos.append(Spacer(1, 0.1*inch))
+    
+    datos_principales = [
+        [f"<b>Responsable:</b> {inspeccion.responsable}", f"<b>Fecha:</b> {inspeccion.fecha} (Día {inspeccion.dia_turno})"],
+        [f"<b>Sitio:</b> {inspeccion.nombre_sitio}", f"<b>Horómetro:</b> {inspeccion.horometro}"],
+        [f"<b>Hora Inicio:</b> {inspeccion.hora_inicio}", f"<b>Hora Término:</b> {inspeccion.hora_termino}"]
+    ]
+    
+    tabla_datos = Table(datos_principales, colWidths=[3.5*inch, 3.5*inch])
+    tabla_datos.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+        ('FONTSIZE', (0,0), (-1,-1), 10),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+    ]))
+    elementos.append(tabla_datos)
+    elementos.append(Spacer(1, 0.2*inch))
+    
+    # Grupo Electrógeno
+    elementos.append(Paragraph("GRUPO ELECTRÓGENO CUMMINS Y ESTANQUE DE COMBUSTIBLE", subtitulo_style))
+    elementos.append(Spacer(1, 0.1*inch))
+    
+    datos_ge = [
+        [f"<b>Horas Funcionamiento:</b> {inspeccion.horas_funcionamiento or '-'}", f"<b>Cantidad Arranques:</b> {inspeccion.cantidad_arranques or '-'}"],
+        [f"<b>Nivel Aceite:</b> {inspeccion.nivel_aceite or '-'}", f"<b>Nivel Combustible:</b> {inspeccion.nivel_combustible or '-'}"],
+        [f"<b>Nivel Refrigerante:</b> {inspeccion.nivel_refrigerante or '-'}", f"<b>Próxima Mantención:</b> {inspeccion.proxima_mantencion or '-'}"],
+        [f"<b>Estado GE Principal:</b> {inspeccion.estado_ge_principal or '-'}", f"<b>Uso GE Auxiliar:</b> {inspeccion.uso_ge_auxiliar or '-'}"],
+        [f"<b>Observaciones:</b> {inspeccion.observaciones_ge or 'Sin observaciones'}", ""]
+    ]
+    
+    tabla_ge = Table(datos_ge, colWidths=[3.5*inch, 3.5*inch])
+    tabla_ge.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+        ('FONTSIZE', (0,0), (-1,-1), 10),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+    ]))
+    elementos.append(tabla_ge)
+    elementos.append(Spacer(1, 0.2*inch))
+    
+    # Estado
+    elementos.append(Paragraph(f"<b>ESTADO DEL INFORME:</b> {inspeccion.estado.upper()}", normal_style))
+    elementos.append(Spacer(1, 0.3*inch))
+    
+    # Construir PDF
+    doc.build(elementos)
+    buffer.seek(0)
+    
+    return send_file(buffer, as_attachment=True, download_name=f"inspeccion_cow_{inspeccion.id}.pdf", mimetype='application/pdf')
 
 # 6. SEXTO crear tablas
 with app.app_context():
