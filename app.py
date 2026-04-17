@@ -1,10 +1,9 @@
 from flask import Flask, render_template, redirect, url_for, request, session
 from forms import LoginForm
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash, generate_password_hash
 from forms_cow import InspeccionCOWForm
-from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import os
 
@@ -283,8 +282,6 @@ def inspeccion_cow():
             if campo_foto in request.files:
                 file = request.files[campo_foto]
                 if file and file.filename:
-                    from werkzeug.utils import secure_filename
-                    from datetime import datetime
                     filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.jpg")
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
