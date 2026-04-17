@@ -556,3 +556,126 @@ small {
     transform: scale(1.02);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid #ffeeba;
+}
+
+.foto-existente {
+    margin-top: 8px;
+    padding: 5px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.img-preview-thumb {
+    max-width: 100px;
+    max-height: 80px;
+    border-radius: 4px;
+    margin-top: 5px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.img-preview-thumb:hover {
+    opacity: 0.8;
+}
+
+/* Grid para 33 fotos en edición */
+.fotos-grid-33 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Grid para mejoras en edición */
+.mejoras-grid-editar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.mejora-item-editar {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.mejora-item-editar h4 {
+    margin-top: 0;
+    color: #0033a0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+/* Miniatura de fotos existentes */
+.foto-existente {
+    margin-top: 8px;
+    padding: 5px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.img-preview-thumb {
+    max-width: 100%;
+    max-height: 120px;
+    border-radius: 4px;
+    margin-top: 5px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    object-fit: cover;
+}
+
+.img-preview-thumb:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+    transition: all 0.2s;
+}
+
+/* Modal para zoom de imágenes */
+.modal-img {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    cursor: pointer;
+}
+
+.modal-img-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.close-modal:hover {
+    color: #bbb;
+}

@@ -20,6 +20,12 @@
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
 
+                {% if editando %}
+        <div class="alert-warning">
+            ⚠️ Estás editando el informe #{{ id_inspeccion }}. Los cambios lo dejarán en estado "Pendiente".
+        </div>
+        {% endif %}
+
                         <!-- ==================== DATOS PRINCIPALES ==================== -->
             <fieldset>
                 <legend>📋 Datos Principales</legend>
@@ -218,24 +224,43 @@
                     {{ form.observaciones_ge(class="form-control", rows="3", placeholder="Ej: Interior de generador con aceite derramado, daño estructura de generador...") }}
                 </div>
 
-                <!-- Sección de Fotografías -->
+               
+                                <!-- Fotos GE -->
                 <div class="form-group">
-                    <label>📸 Fotografías de respaldo</label>
+                    <label>📸 Fotografías de respaldo (máximo 3)</label>
                     <div class="fotos-row">
                         <div class="foto-item">
                             <label>Foto 1</label>
                             <input type="file" name="foto_1" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_1 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
                             <label>Foto 2</label>
                             <input type="file" name="foto_2" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_2 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
                             <label>Foto 3</label>
                             <input type="file" name="foto_3" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_3 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                    <small>Seleccione hasta 3 imágenes como evidencia de la inspección</small>
+                    <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
             </fieldset>
 
@@ -342,24 +367,41 @@
                     {{ form.observaciones_rack(class="form-control", rows="3", placeholder="Ok") }}
                 </div>
 
-                                <!-- Fotografías de respaldo - Rack Energía -->
+                                               <!-- Fotos Rack Energía -->
                 <div class="form-group">
-                    <label>📸 Fotografías de respaldo</label>
+                    <label>📸 Fotografías Rack Energía (máximo 3)</label>
                     <div class="fotos-row">
                         <div class="foto-item">
-                            <label>Foto 1</label>
+                            <label>Foto Rack 1</label>
                             <input type="file" name="foto_rack_1" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_rack_1 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_rack_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
-                            <label>Foto 2</label>
+                            <label>Foto Rack 2</label>
                             <input type="file" name="foto_rack_2" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_rack_2 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_rack_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
-                            <label>Foto 3</label>
+                            <label>Foto Rack 3</label>
                             <input type="file" name="foto_rack_3" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_rack_3 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_rack_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                    <small>Seleccione hasta 3 imágenes del rack energía y telecomunicaciones</small>
                 </div>
 
             </fieldset>
@@ -433,206 +475,133 @@
                     {{ form.observaciones_estructuras(class="form-control", rows="3") }}
                 </div>
 
-                <!-- Fotografías de respaldo - Estructuras -->
+                                <!-- Fotos Estructuras -->
                 <div class="form-group">
-                    <label>📸 Fotografías de respaldo</label>
+                    <label>📸 Fotografías Estructuras (máximo 3)</label>
                     <div class="fotos-row">
                         <div class="foto-item">
-                            <label>Foto 1</label>
+                            <label>Foto Estructura 1</label>
                             <input type="file" name="foto_estructuras_1" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_estructuras_1 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_estructuras_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
-                            <label>Foto 2</label>
+                            <label>Foto Estructura 2</label>
                             <input type="file" name="foto_estructuras_2" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_estructuras_2 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_estructuras_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
-                            <label>Foto 3</label>
+                            <label>Foto Estructura 3</label>
                             <input type="file" name="foto_estructuras_3" accept="image/*" class="form-control">
+                            {% if editando and inspeccion.foto_estructuras_3 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion.foto_estructuras_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                    <small>Seleccione hasta 3 imágenes de estructuras, paneles y neumáticos</small>
                 </div>
             </fieldset>
-                        <!-- ==================== LEVANTAMIENTO DE FOTOGRAFÍAS ==================== -->
-            <fieldset>
-                <legend>📸 Levantamiento de Fotografías</legend>
-                
-                <div class="fotos-grid">
-                    <!-- Aquí van los 33 items -->
-                    <!-- Ejemplo de cada item: -->
-                    <div class="foto-item">
-                        <label>1. Fotografía del estado del sitio previo al comienzo de trabajos (recordar llamar a NOC informando el ingreso):</label>
-                        <input type="file" name="foto_lev_1" accept="image/*" class="form-control">
+                                <!-- ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (33 PUNTOS) ==================== -->
+        <fieldset>
+            <legend>📸 Levantamiento de Fotografías (33 Puntos)</legend>
+            <div class="fotos-grid-33">
+                {% for i in range(1, 34) %}
+                <div class="foto-item">
+                    <label>
+                        {% if i == 1 %}1. Fotografía del estado del sitio previo al comienzo de trabajos (recordar llamar a NOC informando el ingreso):
+                        {% elif i == 2 %}2. Fotografía del panel de control del generador donde se observa el indicador de modo automático encendido:
+                        {% elif i == 3 %}3. Ingrese fotografía de plan de mantenimiento del generador:
+                        {% elif i == 4 %}4. Fotografía del nivel de aceite:
+                        {% elif i == 5 %}5. Fotografía del nivel de combustible:
+                        {% elif i == 6 %}6. Foto del refrigerante del generador:
+                        {% elif i == 7 %}7. Ingresar fotografía del estado inicial de planta vertiv:
+                        {% elif i == 8 %}8. Fotografía de la pantalla de la planta rectificadora donde se observa la entrada de corriente alterna:
+                        {% elif i == 9 %}9. Ingresar fotografía del estado de los conversores de planta vertiv:
+                        {% elif i == 10 %}10. Ingresar fotografía del estado de los rectificadores de planta vertiv:
+                        {% elif i == 11 %}11. Ingresar fotografía del voltaje de salida dc, todo lo que alimenta la vertiv:
+                        {% elif i == 12 %}12. Ingresar fotografía del estado de carga de batería planta vertiv (a):
+                        {% elif i == 13 %}13. Ingresar fotografía del estado de carga de batería planta vertiv (b):
+                        {% elif i == 14 %}14. Fotografía del rack de energía antes:
+                        {% elif i == 15 %}15. Fotografía del rack de energía después:
+                        {% elif i == 16 %}16. Fotografía del rack de telecomunicaciones antes:
+                        {% elif i == 17 %}17. Fotografía del rack de telecomunicaciones después:
+                        {% elif i == 18 %}18. Ingresar fotografía filtro IXR antes:
+                        {% elif i == 19 %}19. Ingresar fotografía filtro IXR después:
+                        {% elif i == 20 %}20. Fotografía de rack de baterías N°1 antes:
+                        {% elif i == 21 %}21. Fotografía de rack de baterías N°1 después:
+                        {% elif i == 22 %}22. Fotografía de rack de baterías N°2 antes:
+                        {% elif i == 23 %}23. Fotografía de rack de baterías N°2 después:
+                        {% elif i == 24 %}24. Fotografía de paneles solares antes:
+                        {% elif i == 25 %}25. Fotografía de paneles solares después:
+                        {% elif i == 26 %}26. Fotografía de estructura torre:
+                        {% elif i == 27 %}27. Ingresar fotografía de la antena:
+                        {% elif i == 28 %}28. Fotografía de vientos (a):
+                        {% elif i == 29 %}29. Fotografía de vientos (b):
+                        {% elif i == 30 %}30. Fotografía de vientos (c):
+                        {% elif i == 31 %}31. Ingresar fotografía de neumáticos (a):
+                        {% elif i == 32 %}32. Ingresar fotografía de neumáticos (b):
+                        {% elif i == 33 %}33. Fotografía del sitio al término de los trabajos (Recordar llamar a NOC, informando la salida del sitio):
+                        {% endif %}
+                    </label>
+                    <input type="file" name="foto_lev_{{ i }}" accept="image/*" class="form-control">
+                    {% if editando and inspeccion %}
+                        {% set foto_attr = 'foto_levantamiento_' ~ i %}
+                        {% set foto_existente = inspeccion[foto_attr] if foto_attr in inspeccion.__dict__ else None %}
+                        {% if foto_existente %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + foto_existente) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
+        </fieldset>
+                                <!-- ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ==================== -->
+        <fieldset>
+            <legend>🔧 Levantamiento Fotografías de Mejoras</legend>
+            <div class="mejoras-grid-editar">
+                {% for i in range(1, 5) %}
+                <div class="mejora-item-editar">
+                    <h4>Mejora {{ i }}</h4>
+                    
+                    <div class="form-group">
+                        <label>Descripción de la mejora {{ i }}:</label>
+                        <textarea name="desc_mejora_{{ i }}" class="form-control" rows="3" placeholder="Describa la mejora realizada...">{% if editando and inspeccion %}{{ inspeccion['descripcion_mejora_' ~ i] or '' }}{% endif %}</textarea>
                     </div>
-                    <div class="foto-item">
-                        <label>2. Fotografía del panel de control del generador donde se observa el indicador de modo automático encendido:</label>
-                        <input type="file" name="foto_lev_2" accept="image/*" class="form-control">
-                        <input type="file" name="foto_lev_34" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>3. Ingrese fotografía de plan de mantenimiento del generador:</label>
-                        <input type="file" name="foto_lev_3" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>4. Fotografía del nivel de aceite:</label>
-                        <input type="file" name="foto_lev_4" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>5. Fotografía del nivel de combustible:</label>
-                        <input type="file" name="foto_lev_5" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>6. Foto del refrigerante del generador:</label>
-                        <input type="file" name="foto_lev_6" accept="image/*" class="form-control">
-                    </div>
-                        <div class="foto-item">
-                        <label>7. Ingresar fotografia del estado inicial de planta vertiv:</label>
-                        <input type="file" name="foto_lev_7" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>8. Fotografía de la pantalla de la planta rectificadora donde se observa la entrada de corriente alterna:</label>
-                        <input type="file" name="foto_lev_8" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>9. Ingresar fotografia del estado de los conversores de planta vertiv:</label>
-                        <input type="file" name="foto_lev_9" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>10. Ingresar fotografia del estado de los rectificadores de planta vertiv:</label>
-                        <input type="file" name="foto_lev_10" accept="image/*" class="form-control">
-                    </div>
-                        <div class="foto-item">
-                        <label>11. Ingresar fotografía del voltaje de salida dc, todo lo que alimenta la vertiv:</label>
-                        <input type="file" name="foto_lev_11" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>12. Ingresar fotografia del estado de carga de bateria planta vertiv (a):</label>
-                        <input type="file" name="foto_lev_12" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>13. Ingresar fotografia del estado de carga de bateria planta vertiv (b):</label>
-                        <input type="file" name="foto_lev_13" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>14. Fotografía del rack de energía antes:</label>
-                        <input type="file" name="foto_lev_14" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>15. Fotografía del rack de energía después:</label>
-                        <input type="file" name="foto_lev_15" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>16. Fotografía del rack de telecomunicaciones antes:</label>
-                        <input type="file" name="foto_lev_16" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>17. Fotografía del rack de telecomunicaciones después:</label>
-                        <input type="file" name="foto_lev_17" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>18. Ingresar fotografía filtro IXR antes:</label>
-                        <input type="file" name="foto_lev_18" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>19. Ingresar fotografía filtro IXR después:</label>
-                        <input type="file" name="foto_lev_19" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>20. Fotografía de rack de baterías N°1 antes:</label>
-                        <input type="file" name="foto_lev_20" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>21. Fotografía de rack de baterías N°1 después:</label>
-                        <input type="file" name="foto_lev_21" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>22. Fotografía de rack de baterías N°2 antes:</label>
-                        <input type="file" name="foto_lev_22" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>23. Fotografía de rack de baterías N°2 después:</label>
-                        <input type="file" name="foto_lev_23" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>24. Fotografía de paneles solares antes:</label>
-                        <input type="file" name="foto_lev_24" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>25. Fotografía de paneles solares después:</label>
-                        <input type="file" name="foto_lev_25" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>26. Fotografía de estructura torre:</label>
-                        <input type="file" name="foto_lev_26" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>27. Ingresar fotografía de la antena:</label>
-                        <input type="file" name="foto_lev_27" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>28. Fotografía de vientos (a):</label>
-                        <input type="file" name="foto_lev_28" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>29. Fotografía de vientos (b):</label>
-                        <input type="file" name="foto_lev_29" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>30. Fotografía de vientos (c):</label>
-                        <input type="file" name="foto_lev_30" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>31. Ingresar fotografía de neumáticos (a):</label>
-                        <input type="file" name="foto_lev_31" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>32. Ingresar fotografía de neumáticos (b):</label>
-                        <input type="file" name="foto_lev_32" accept="image/*" class="form-control">
-                    </div>
-                    <div class="foto-item">
-                        <label>33. Fotografía del sitio al término de los trabajos (Recordar llamar a NOC, informando la salida del sitio):</label>
-                        <input type="file" name="foto_lev_33" accept="image/*" class="form-control">
+                    
+                    <div class="form-group">
+                        <label>Fotografía de evidencia mejora {{ i }}:</label>
+                        <input type="file" name="foto_mejora_{{ i }}" accept="image/*" class="form-control">
+                        {% if editando and inspeccion %}
+                            {% set foto_attr = 'foto_mejora_' ~ i %}
+                            {% set foto_existente = inspeccion[foto_attr] if foto_attr in inspeccion.__dict__ else None %}
+                            {% if foto_existente %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + foto_existente) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
-            </fieldset>
-                        <!-- ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ==================== -->
-            <fieldset>
-                <legend>🔧 Levantamiento fotografías de mejoras</legend>
-                
-                <div class="mejoras-grid">
-                    <!-- Mejora 1 -->
-                    <div class="mejora-item">
-                        <label>Descripción</label>
-                        <input type="text" name="desc_mejora_1" class="form-control" placeholder="Describa la mejora realizada">
-                        <label>Fotografía de mejora</label>
-                        <input type="file" name="foto_mejora_1" accept="image/*" class="form-control">
-                    </div>
-                    
-                    <!-- Mejora 2 -->
-                    <div class="mejora-item">
-                        <label>Descripción</label>
-                        <input type="text" name="desc_mejora_2" class="form-control" placeholder="Describa la mejora realizada">
-                        <label>Fotografía de mejora</label>
-                        <input type="file" name="foto_mejora_2" accept="image/*" class="form-control">
-                    </div>
-                    
-                    <!-- Mejora 3 -->
-                    <div class="mejora-item">
-                        <label>Descripción</label>
-                        <input type="text" name="desc_mejora_3" class="form-control" placeholder="Describa la mejora realizada">
-                        <label>Fotografía de mejora</label>
-                        <input type="file" name="foto_mejora_3" accept="image/*" class="form-control">
-                    </div>
-                    
-                    <!-- Mejora 4 -->
-                    <div class="mejora-item">
-                        <label>Descripción</label>
-                        <input type="text" name="desc_mejora_4" class="form-control" placeholder="Describa la mejora realizada">
-                        <label>Fotografía de mejora</label>
-                        <input type="file" name="foto_mejora_4" accept="image/*" class="form-control">
-                    </div>
-                </div>
-            </fieldset>
+                {% endfor %}
+            </div>
+            <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
+        </fieldset>
 
             <!-- ==================== BOTÓN ENVIAR ==================== -->
             <div class="form-group">
@@ -640,5 +609,31 @@
             </div>
         </form>
     </div>
+        <!-- Modal para visualización de imágenes en grande -->
+    <div id="modalImagen" class="modal-img" onclick="cerrarModal()">
+        <span class="close-modal">&times;</span>
+        <img class="modal-img-content" id="imagenModal">
+    </div>
+
+    <script>
+        function abrirImagen(src) {
+            var modal = document.getElementById('modalImagen');
+            var modalImg = document.getElementById('imagenModal');
+            modal.style.display = "block";
+            modalImg.src = src;
+        }
+        
+        function cerrarModal() {
+            var modal = document.getElementById('modalImagen');
+            modal.style.display = "none";
+        }
+        
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                cerrarModal();
+            }
+        });
+    </script>
 </body>
 </html>

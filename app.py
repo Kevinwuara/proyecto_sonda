@@ -636,10 +636,18 @@ def editar_informe(id):
         return "No tienes permiso para editar este informe", 403
     
     form = InspeccionCOWForm()
-    fecha_actual, dia_turno, estado_turno = calcular_fecha_turno()
     
-    if form.validate_on_submit():
-        # Actualizar campos
+    if request.method == 'POST' and form.validate_on_submit():
+        # Obtener fecha
+        fecha_seleccionada = request.form.get('fecha')
+        if fecha_seleccionada:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno(fecha_seleccionada)
+        else:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+        
+        # Actualizar campos de texto
+        inspeccion.fecha = fecha_actual
+        inspeccion.dia_turno = dia_turno
         inspeccion.responsable = form.responsable.data
         inspeccion.nombre_sitio = form.nombre_sitio.data
         inspeccion.horometro = form.horometro.data
@@ -662,12 +670,105 @@ def editar_informe(id):
         inspeccion.cable_5p_4p = form.cable_5p_4p.data
         inspeccion.adaptador_ge_aux = form.adaptador_ge_aux.data
         inspeccion.observaciones_ge = form.observaciones_ge.data
-        inspeccion.estado = 'pendiente'  # Al editar, vuelve a pendiente
+        inspeccion.observaciones_rack = form.observaciones_rack.data
+        inspeccion.observaciones_estructuras = form.observaciones_estructuras.data
+        inspeccion.limpieza_rack_energia = form.limpieza_rack_energia.data
+        inspeccion.estado_planta_vertiv = form.estado_planta_vertiv.data
+        inspeccion.rectificador_n1 = form.rectificador_n1.data
+        inspeccion.rectificador_n2 = form.rectificador_n2.data
+        inspeccion.rectificador_n3 = form.rectificador_n3.data
+        inspeccion.estado_air_scale = form.estado_air_scale.data
+        inspeccion.estado_alarmas = form.estado_alarmas.data
+        inspeccion.estado_7250_ixr = form.estado_7250_ixr.data
+        inspeccion.estado_fpfh = form.estado_fpfh.data
+        inspeccion.conversor_solar_n1 = form.conversor_solar_n1.data
+        inspeccion.conversor_solar_n2 = form.conversor_solar_n2.data
+        inspeccion.limpieza_rack_baterias = form.limpieza_rack_baterias.data
+        inspeccion.estado_baterias = form.estado_baterias.data
+        inspeccion.estado_inversor = form.estado_inversor.data
+        inspeccion.estado_ventiladores = form.estado_ventiladores.data
+        inspeccion.limpieza_rack_telecom = form.limpieza_rack_telecom.data
+        inspeccion.limpieza_paneles = form.limpieza_paneles.data
+        inspeccion.estructura_paneles = form.estructura_paneles.data
+        inspeccion.cantidad_cunas = form.cantidad_cunas.data
+        inspeccion.checkpoints = form.checkpoints.data
+        inspeccion.presion_neumaticos = form.presion_neumaticos.data
+        inspeccion.estado_torre = form.estado_torre.data
+        inspeccion.estado_piolas_viento = form.estado_piolas_viento.data
+        inspeccion.nivelacion_carro = form.nivelacion_carro.data
+        inspeccion.gatas_posicionamiento = form.gatas_posicionamiento.data
+        inspeccion.manivelas_izaje = form.manivelas_izaje.data
         
+        # ==================== PROCESAR FOTOS (mantener existentes o reemplazar) ====================
+        # Fotos GE (3)
+        for i in range(1, 4):
+            campo_foto = f'foto_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_edit_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    setattr(inspeccion, f'foto_{i}', filename)
+        
+        # Fotos Rack (3)
+        for i in range(1, 4):
+            campo_foto = f'foto_rack_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_edit_rack_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    setattr(inspeccion, f'foto_rack_{i}', filename)
+        
+        # Fotos Estructuras (3)
+        for i in range(1, 4):
+            campo_foto = f'foto_estructuras_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_edit_est_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    setattr(inspeccion, f'foto_estructuras_{i}', filename)
+        
+        # Fotos Levantamiento (33)
+        for i in range(1, 34):
+            campo_foto = f'foto_lev_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_edit_lev_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    setattr(inspeccion, f'foto_levantamiento_{i}', filename)
+        
+        # Fotos Mejoras (4) y descripciones
+        for i in range(1, 5):
+            campo_foto = f'foto_mejora_{i}'
+            campo_desc = f'desc_mejora_{i}'
+            
+            # Actualizar descripción
+            desc = request.form.get(campo_desc, '')
+            setattr(inspeccion, f'descripcion_mejora_{i}', desc)
+            
+            # Actualizar foto si se subió una nueva
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_edit_mejora_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    setattr(inspeccion, f'foto_mejora_{i}', filename)
+        
+        # Cambiar estado a pendiente después de editar
+        inspeccion.estado = 'pendiente'
         db.session.commit()
+        
         return redirect(url_for('ver_informes'))
     
-    # Cargar datos existentes en el formulario
+    # GET request - Cargar datos existentes en el formulario
     if request.method == 'GET':
         form.responsable.data = inspeccion.responsable
         form.nombre_sitio.data = inspeccion.nombre_sitio
@@ -691,8 +792,37 @@ def editar_informe(id):
         form.cable_5p_4p.data = inspeccion.cable_5p_4p
         form.adaptador_ge_aux.data = inspeccion.adaptador_ge_aux
         form.observaciones_ge.data = inspeccion.observaciones_ge
+        form.observaciones_rack.data = inspeccion.observaciones_rack
+        form.observaciones_estructuras.data = inspeccion.observaciones_estructuras
+        form.limpieza_rack_energia.data = inspeccion.limpieza_rack_energia
+        form.estado_planta_vertiv.data = inspeccion.estado_planta_vertiv
+        form.rectificador_n1.data = inspeccion.rectificador_n1
+        form.rectificador_n2.data = inspeccion.rectificador_n2
+        form.rectificador_n3.data = inspeccion.rectificador_n3
+        form.estado_air_scale.data = inspeccion.estado_air_scale
+        form.estado_alarmas.data = inspeccion.estado_alarmas
+        form.estado_7250_ixr.data = inspeccion.estado_7250_ixr
+        form.estado_fpfh.data = inspeccion.estado_fpfh
+        form.conversor_solar_n1.data = inspeccion.conversor_solar_n1
+        form.conversor_solar_n2.data = inspeccion.conversor_solar_n2
+        form.limpieza_rack_baterias.data = inspeccion.limpieza_rack_baterias
+        form.estado_baterias.data = inspeccion.estado_baterias
+        form.estado_inversor.data = inspeccion.estado_inversor
+        form.estado_ventiladores.data = inspeccion.estado_ventiladores
+        form.limpieza_rack_telecom.data = inspeccion.limpieza_rack_telecom
+        form.limpieza_paneles.data = inspeccion.limpieza_paneles
+        form.estructura_paneles.data = inspeccion.estructura_paneles
+        form.cantidad_cunas.data = inspeccion.cantidad_cunas
+        form.checkpoints.data = inspeccion.checkpoints
+        form.presion_neumaticos.data = inspeccion.presion_neumaticos
+        form.estado_torre.data = inspeccion.estado_torre
+        form.estado_piolas_viento.data = inspeccion.estado_piolas_viento
+        form.nivelacion_carro.data = inspeccion.nivelacion_carro
+        form.gatas_posicionamiento.data = inspeccion.gatas_posicionamiento
+        form.manivelas_izaje.data = inspeccion.manivelas_izaje
     
-    return render_template('formularios/inspeccion_cow.html', form=form, usuario=session['nombre'], fecha=fecha_actual, dia_turno=dia_turno, estado_turno=estado_turno, editando=True, id_inspeccion=id)
+    fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+    return render_template('formularios/inspeccion_cow.html', form=form, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno, editando=True, id_inspeccion=id, inspeccion=inspeccion)
 
 @app.route('/borrar_informe/<int:id>')
 def borrar_informe(id):
