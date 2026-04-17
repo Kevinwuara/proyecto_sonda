@@ -438,7 +438,7 @@ small {
 }
 
 .btn-borrar {
-    background-color: #dc3545;
+    background-color: #a3212e;
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
@@ -681,13 +681,15 @@ small {
 }
 
 .btn-pdf {
-    background-color: #dc3545;
+    background-color: #272425;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
     text-decoration: none;
+    font-size: 0.8em;
+    margin: 0 2px;
 }
 
 .btn-pdf:hover {
-    background-color: #bb2d3b;
+    background-color: #322b57;
 }
