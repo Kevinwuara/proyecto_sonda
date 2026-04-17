@@ -518,6 +518,99 @@
             </div>
         </fieldset>
 
+            <!-- Modal para ver imágenes en grande -->
+    <div id="imageModal" class="modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <style>
+        /* Estilos del modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #bbb;
+        }
+        
+        /* Hacer que las imágenes tengan cursor pointer */
+        .img-preview {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .img-preview:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+
+    <script>
+        // Obtener el modal
+        var modal = document.getElementById("imageModal");
+        var modalImg = document.getElementById("modalImage");
+        var closeBtn = document.getElementsByClassName("close-modal")[0];
+        
+        // Agregar evento click a todas las imágenes con clase img-preview
+        document.addEventListener('DOMContentLoaded', function() {
+            var images = document.querySelectorAll('.img-preview');
+            images.forEach(function(img) {
+                img.addEventListener('click', function() {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                });
+            });
+        });
+        
+        // Cerrar modal al hacer clic en la X
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // Cerrar modal al hacer clic fuera de la imagen
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape" && modal.style.display === "block") {
+                modal.style.display = "none";
+            }
+        });
+    </script>
+
         <!-- Botones de acción -->
         <div class="acciones-detalle">
             <a href="{{ url_for('editar_informe', id=inspeccion.id) }}" class="btn-editar">Editar Informe</a>
