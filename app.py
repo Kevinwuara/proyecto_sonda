@@ -7,11 +7,11 @@ from forms_cow import InspeccionCOWForm
 from werkzeug.utils import secure_filename
 import os
 from reportlab.lib.pagesizes import letter, landscape
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as ReportLabImage
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from io import BytesIO
@@ -866,78 +866,353 @@ def generar_pdf(id):
     # Crear buffer para PDF
     buffer = BytesIO()
     
-    # Crear documento PDF en orientación vertical
-    doc = SimpleDocTemplate(buffer, pagesize=letter, 
-                           topMargin=0.5*inch, bottomMargin=0.5*inch,
-                           leftMargin=0.5*inch, rightMargin=0.5*inch)
+    # Crear documento PDF
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                           topMargin=0.7*inch, bottomMargin=0.7*inch,
+                           leftMargin=0.7*inch, rightMargin=0.7*inch)
     
     # Estilos
     styles = getSampleStyleSheet()
-    titulo_style = ParagraphStyle('TituloStyle', parent=styles['Heading1'], 
-                                   alignment=TA_CENTER, fontSize=16, textColor=colors.HexColor('#0033a0'))
+    
+    # Estilo para título principal
+    titulo_style = ParagraphStyle('TituloStyle', parent=styles['Heading1'],
+                                   alignment=TA_CENTER, fontSize=18, 
+                                   textColor=colors.HexColor('#0033a0'),
+                                   spaceAfter=20, fontName='Helvetica-Bold')
+    
+    # Estilo para subtítulos
     subtitulo_style = ParagraphStyle('SubtituloStyle', parent=styles['Heading2'],
-                                      fontSize=12, textColor=colors.HexColor('#0033a0'))
+                                      fontSize=14, textColor=colors.HexColor('#0033a0'),
+                                      spaceBefore=15, spaceAfter=10, fontName='Helvetica-Bold')
+    
+    # Estilo para texto normal
     normal_style = styles['Normal']
+    
+    # Estilo para celdas de tabla
+    cell_style = ParagraphStyle('CellStyle', parent=normal_style, fontSize=9)
+
+        # Estilo para título centrado en tabla
+    titulo_tabla_style = ParagraphStyle('TituloTablaStyle', parent=normal_style,
+                                         alignment=TA_CENTER, fontSize=11, 
+                                         fontName='Helvetica-Bold')
     
     # Contenido del PDF
     elementos = []
     
-    # Título principal
-    elementos.append(Paragraph("INSPECCIÓN DIARIA COW", titulo_style))
+        # ==================== ENCABEZADO CON LOGOS (TABLA 1x3 CON BORDES) ====================
+    
+    # Logo Nokia (izquierda)
+    try:
+        logo_nokia = Image('static/img/nokia_logo.png', width=1.5*inch, height=0.5*inch)
+    except:
+        logo_nokia = Paragraph("", normal_style)
+    
+    # Título centrado
+    titulo_encabezado = Paragraph("INSPECCIÓN DIARIA COW", 
+                                   ParagraphStyle('EncabezadoStyle', parent=normal_style,
+                                                 alignment=TA_CENTER, fontSize=14, 
+                                                 textColor=colors.HexColor("#000000"),
+                                                 fontName='Helvetica-Bold'))
+    
+    # Logo Sonda (derecha)
+    try:
+        logo_sonda = Image('static/img/sonda_logo.png', width=1.5*inch, height=0.5*inch)
+    except:
+        logo_sonda = Paragraph("", normal_style)
+    
+    # Tabla de 1 fila y 3 columnas CON BORDES NEGROS
+    encabezado_tabla = Table([[logo_nokia, titulo_encabezado, logo_sonda]], 
+                              colWidths=[2.0*inch, 3.0*inch, 2.0*inch])
+    
+    encabezado_tabla.setStyle(TableStyle([
+        ('ALIGN', (0,0), (0,0), 'LEFT'),     # Nokia a la izquierda
+        ('ALIGN', (1,0), (1,0), 'CENTER'),   # Título centrado
+        ('ALIGN', (2,0), (2,0), 'RIGHT'),    # Sonda a la derecha
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),  # Bordes negros en toda la tabla
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('RIGHTPADDING', (0,0), (-1,-1), 10),
+    ]))
+    
+    elementos.append(encabezado_tabla)
     elementos.append(Spacer(1, 0.2*inch))
     
-    # Datos Principales
-    elementos.append(Paragraph("DATOS PRINCIPALES", subtitulo_style))
-    elementos.append(Spacer(1, 0.1*inch))
-    
+        # ==================== DATOS PRINCIPALES ====================
+    # Tabla con título centrado y datos en 2 columnas
     datos_principales = [
-        [f"<b>Responsable:</b> {inspeccion.responsable}", f"<b>Fecha:</b> {inspeccion.fecha} (Día {inspeccion.dia_turno})"],
-        [f"<b>Sitio:</b> {inspeccion.nombre_sitio}", f"<b>Horómetro:</b> {inspeccion.horometro}"],
-        [f"<b>Hora Inicio:</b> {inspeccion.hora_inicio}", f"<b>Hora Término:</b> {inspeccion.hora_termino}"]
+        [Paragraph("<b>DATOS PRINCIPALES</b>", titulo_tabla_style), ""],
+        [Paragraph(f"<b>Responsable:</b> {inspeccion.responsable}", cell_style),
+         Paragraph(f"<b>Fecha:</b> {inspeccion.fecha} (Día {inspeccion.dia_turno})", cell_style)],
+        [Paragraph(f"<b>Nombre del Sitio:</b> {inspeccion.nombre_sitio}", cell_style),
+         Paragraph(f"<b>Hora Inicio:</b> {inspeccion.hora_inicio}", cell_style)],
+        [Paragraph(f"<b>Horómetro:</b> {inspeccion.horometro}", cell_style),
+         Paragraph(f"<b>Hora Término:</b> {inspeccion.hora_termino}", cell_style)],
     ]
     
-    tabla_datos = Table(datos_principales, colWidths=[3.5*inch, 3.5*inch])
-    tabla_datos.setStyle(TableStyle([
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+    tabla_principales = Table(datos_principales, colWidths=[3.5*inch, 3.5*inch])
+    tabla_principales.setStyle(TableStyle([
+        ('SPAN', (0,0), (1,0)),  # Unir celdas para el título
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
         ('FONTSIZE', (0,0), (-1,-1), 10),
-        ('TOPPADDING', (0,0), (-1,-1), 5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
     ]))
-    elementos.append(tabla_datos)
+    elementos.append(tabla_principales)
     elementos.append(Spacer(1, 0.2*inch))
     
-    # Grupo Electrógeno
-    elementos.append(Paragraph("GRUPO ELECTRÓGENO CUMMINS Y ESTANQUE DE COMBUSTIBLE", subtitulo_style))
-    elementos.append(Spacer(1, 0.1*inch))
+        # ==================== GRUPO ELECTRÓGENO ====================
+    # Título dentro de la tabla (combinado)
+    titulo_ge = Paragraph("Grupo Electrógeno Cummins y Estanque de Combustible", 
+                          ParagraphStyle('TituloGEStyle', parent=normal_style,
+                                        alignment=TA_CENTER, fontSize=12,
+                                        textColor=colors.HexColor("#000000"),
+                                        fontName='Helvetica-Bold'))
+    
+    # Construir tabla GE completa (6 filas de datos + fila estado GE + fila uso GE)
+    # Estructura: [Campo1, Valor1, Campo2, OK, NOK]
     
     datos_ge = [
-        [f"<b>Horas Funcionamiento:</b> {inspeccion.horas_funcionamiento or '-'}", f"<b>Cantidad Arranques:</b> {inspeccion.cantidad_arranques or '-'}"],
-        [f"<b>Nivel Aceite:</b> {inspeccion.nivel_aceite or '-'}", f"<b>Nivel Combustible:</b> {inspeccion.nivel_combustible or '-'}"],
-        [f"<b>Nivel Refrigerante:</b> {inspeccion.nivel_refrigerante or '-'}", f"<b>Próxima Mantención:</b> {inspeccion.proxima_mantencion or '-'}"],
-        [f"<b>Estado GE Principal:</b> {inspeccion.estado_ge_principal or '-'}", f"<b>Uso GE Auxiliar:</b> {inspeccion.uso_ge_auxiliar or '-'}"],
-        [f"<b>Observaciones:</b> {inspeccion.observaciones_ge or 'Sin observaciones'}", ""]
+        # Fila 0: Título (combinado)
+        [titulo_ge, "", "", ""],
+        # Fila 1: Encabezados OK/NOK
+        [Paragraph("", cell_style), Paragraph("", cell_style), Paragraph("", cell_style), 
+         Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style)],
+        # Fila 2
+        [Paragraph("<b>Horas de Funcionamiento</b>", cell_style), 
+         Paragraph(str(inspeccion.horas_funcionamiento or '-'), cell_style),
+         Paragraph("<b>Limpieza GE Interior</b>", cell_style),
+         Paragraph("X" if inspeccion.limpieza_ge_interior == 'OK' else "", cell_style),
+         Paragraph("X" if inspeccion.limpieza_ge_interior == 'NOK' else "", cell_style)],
+        # Fila 3
+        [Paragraph("<b>Cantidad de Arranques</b>", cell_style), 
+         Paragraph(str(inspeccion.cantidad_arranques or '-'), cell_style),
+         Paragraph("<b>Limpieza Radiador</b>", cell_style),
+         Paragraph("X" if inspeccion.limpieza_radiador == 'OK' else "", cell_style),
+         Paragraph("X" if inspeccion.limpieza_radiador == 'NOK' else "", cell_style)],
+        # Fila 4
+        [Paragraph("<b>Nivel de Aceite</b>", cell_style), 
+         Paragraph(inspeccion.nivel_aceite or '-', cell_style),
+         Paragraph("<b>Sistema Combustible</b>", cell_style),
+         Paragraph("X" if inspeccion.sistema_combustible == 'OK' else "", cell_style),
+         Paragraph("X" if inspeccion.sistema_combustible == 'NOK' else "", cell_style)],
+        # Fila 5
+        [Paragraph("<b>Nivel de Combustible</b>", cell_style), 
+         Paragraph(inspeccion.nivel_combustible or '-', cell_style),
+         Paragraph("<b>Arranque Automático</b>", cell_style),
+         Paragraph("X" if inspeccion.arranque_automatico == 'OK' else "", cell_style),
+         Paragraph("X" if inspeccion.arranque_automatico == 'NOK' else "", cell_style)],
+        # Fila 6
+        [Paragraph("<b>Nivel de Refrigerante</b>", cell_style), 
+         Paragraph(inspeccion.nivel_refrigerante or '-', cell_style),
+         Paragraph("<b>Limpieza Interior</b>", cell_style),
+         Paragraph("X" if inspeccion.limpieza_interior == 'OK' else "", cell_style),
+         Paragraph("X" if inspeccion.limpieza_interior == 'NOK' else "", cell_style)],
+        # Fila 7
+        [Paragraph("<b>Próxima Mantención</b>", cell_style), 
+         Paragraph(str(inspeccion.proxima_mantencion or '-'), cell_style),
+         Paragraph("<b>Limpieza Exterior</b>", cell_style),
+         Paragraph("X" if inspeccion.limpieza_exterior == 'OK' else "", cell_style),
+         Paragraph("X" if inspeccion.limpieza_exterior == 'NOK' else "", cell_style)],
     ]
     
-    tabla_ge = Table(datos_ge, colWidths=[3.5*inch, 3.5*inch])
+    # Crear tabla
+    tabla_ge = Table(datos_ge, colWidths=[2.8*inch, 0.9*inch, 2.3*inch, 0.5*inch, 0.5*inch])
     tabla_ge.setStyle(TableStyle([
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        # Título combinado en la primera fila
+        ('SPAN', (0,0), (4,0)),
+        ('ALIGN', (0,0), (-1,0), 'CENTER'),
+        ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
+        # Encabezados OK/NOK
+        ('TEXTCOLOR', (3,1), (4,1), colors.white),
+        # Estilos generales
+        ('ALIGN', (0,2), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-        ('FONTSIZE', (0,0), (-1,-1), 10),
-        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        # Alinear texto de la primera columna a la izquierda
+        ('ALIGN', (0,2), (0,-1), 'LEFT'),
+        ('ALIGN', (2,2), (2,-1), 'LEFT'),
     ]))
+    
     elementos.append(tabla_ge)
+    elementos.append(Spacer(1, 0.1*inch))
+    
+    # Fila Estado de GE Principal y Cable 5p/4p (como en la imagen)
+    datos_estado_cable = [
+        [Paragraph("<b>Estado de GE Principal</b>", cell_style),
+         Paragraph(f"Auto {'✓' if inspeccion.estado_ge_principal == 'Auto' else '✗'}", cell_style),
+         Paragraph(f"Shutdown {'✓' if inspeccion.estado_ge_principal == 'Shutdown' else '✗'}", cell_style),
+         Paragraph("<b>Cable 5p/4p GE Auxiliar</b>", cell_style),
+         Paragraph(f"SI {'✓' if inspeccion.cable_5p_4p == 'SI' else '✗'}", cell_style),
+         Paragraph(f"NO {'✓' if inspeccion.cable_5p_4p == 'NO' else '✗'}", cell_style)],
+    ]
+    
+    tabla_estado_cable = Table(datos_estado_cable, colWidths=[1.2*inch, 0.6*inch, 0.6*inch, 1.2*inch, 0.5*inch, 0.5*inch])
+    tabla_estado_cable.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+    ]))
+    elementos.append(tabla_estado_cable)
+    elementos.append(Spacer(1, 0.05*inch))
+    
+    # Fila Uso de GE Auxiliar y Adaptador
+    datos_uso_adaptador = [
+        [Paragraph("<b>Uso de GE Auxiliar</b>", cell_style),
+         Paragraph(f"SI {'✓' if inspeccion.uso_ge_auxiliar == 'SI' else '✗'}", cell_style),
+         Paragraph(f"NO {'✓' if inspeccion.uso_ge_auxiliar == 'NO' else '✗'}", cell_style),
+         Paragraph("<b>Cuenta con adapt. para GE Aux</b>", cell_style),
+         Paragraph(f"SI {'✓' if inspeccion.adaptador_ge_aux == 'SI' else '✗'}", cell_style),
+         Paragraph(f"NO {'✓' if inspeccion.adaptador_ge_aux == 'NO' else '✗'}", cell_style)],
+    ]
+    
+    tabla_uso_adaptador = Table(datos_uso_adaptador, colWidths=[1.2*inch, 0.6*inch, 0.6*inch, 1.2*inch, 0.5*inch, 0.5*inch])
+    tabla_uso_adaptador.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+    ]))
+    elementos.append(tabla_uso_adaptador)
+    elementos.append(Spacer(1, 0.1*inch))
+    
+    # Observaciones GE
+    elementos.append(Paragraph("<b>Observaciones:</b>", cell_style))
+    elementos.append(Paragraph(inspeccion.observaciones_ge or 'Sin observaciones', cell_style))
     elementos.append(Spacer(1, 0.2*inch))
     
-    # Estado
-    elementos.append(Paragraph(f"<b>ESTADO DEL INFORME:</b> {inspeccion.estado.upper()}", normal_style))
+    # ==================== RACK ENERGÍA ====================
+    elementos.append(Paragraph("Rack Energía, Telecom y Baterías", subtitulo_style))
+    
+    datos_rack = [
+        [Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style),
+         Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style)],
+        [Paragraph("Limpieza Rack Energía", cell_style),
+         Paragraph("✓" if inspeccion.limpieza_rack_energia == 'OK' else "✗" if inspeccion.limpieza_rack_energia == 'NOK' else "-", cell_style),
+         Paragraph("Limpieza Rack Telecom", cell_style),
+         Paragraph("✓" if inspeccion.limpieza_rack_telecom == 'OK' else "✗" if inspeccion.limpieza_rack_telecom == 'NOK' else "-", cell_style)],
+        [Paragraph("Estado Planta Vertiv", cell_style),
+         Paragraph("✓" if inspeccion.estado_planta_vertiv == 'OK' else "✗" if inspeccion.estado_planta_vertiv == 'NOK' else "-", cell_style),
+         Paragraph("Estado Air Scale", cell_style),
+         Paragraph("✓" if inspeccion.estado_air_scale == 'OK' else "✗" if inspeccion.estado_air_scale == 'NOK' else "-", cell_style)],
+        [Paragraph("Rectificador N°1", cell_style),
+         Paragraph("✓" if inspeccion.rectificador_n1 == 'OK' else "✗" if inspeccion.rectificador_n1 == 'NOK' else "-", cell_style),
+         Paragraph("Estado de Alarmas", cell_style),
+         Paragraph("✓" if inspeccion.estado_alarmas == 'OK' else "✗" if inspeccion.estado_alarmas == 'NOK' else "-", cell_style)],
+        [Paragraph("Rectificador N°2", cell_style),
+         Paragraph("✓" if inspeccion.rectificador_n2 == 'OK' else "✗" if inspeccion.rectificador_n2 == 'NOK' else "-", cell_style),
+         Paragraph("Estado 7250-IXR", cell_style),
+         Paragraph("✓" if inspeccion.estado_7250_ixr == 'OK' else "✗" if inspeccion.estado_7250_ixr == 'NOK' else "-", cell_style)],
+        [Paragraph("Rectificador N°3", cell_style),
+         Paragraph("✓" if inspeccion.rectificador_n3 == 'OK' else "✗" if inspeccion.rectificador_n3 == 'NOK' else "-", cell_style),
+         Paragraph("Estado FPFH", cell_style),
+         Paragraph("✓" if inspeccion.estado_fpfh == 'OK' else "✗" if inspeccion.estado_fpfh == 'NOK' else "-", cell_style)],
+        [Paragraph("Conversor Solar N°1", cell_style),
+         Paragraph("✓" if inspeccion.conversor_solar_n1 == 'OK' else "✗" if inspeccion.conversor_solar_n1 == 'NOK' else "-", cell_style),
+         Paragraph("Limpieza Rack Baterías", cell_style),
+         Paragraph("✓" if inspeccion.limpieza_rack_baterias == 'OK' else "✗" if inspeccion.limpieza_rack_baterias == 'NOK' else "-", cell_style)],
+        [Paragraph("Conversor Solar N°2", cell_style),
+         Paragraph("✓" if inspeccion.conversor_solar_n2 == 'OK' else "✗" if inspeccion.conversor_solar_n2 == 'NOK' else "-", cell_style),
+         Paragraph("Estado Baterías", cell_style),
+         Paragraph("✓" if inspeccion.estado_baterias == 'OK' else "✗" if inspeccion.estado_baterias == 'NOK' else "-", cell_style)],
+        [Paragraph("Estado Inversor", cell_style),
+         Paragraph("✓" if inspeccion.estado_inversor == 'OK' else "✗" if inspeccion.estado_inversor == 'NOK' else "-", cell_style),
+         Paragraph("Estado Ventiladores", cell_style),
+         Paragraph("✓" if inspeccion.estado_ventiladores == 'OK' else "✗" if inspeccion.estado_ventiladores == 'NOK' else "-", cell_style)],
+    ]
+    
+    tabla_rack = Table(datos_rack, colWidths=[1.8*inch, 1.0*inch, 1.8*inch, 1.0*inch])
+    tabla_rack.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0033a0')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('FONTSIZE', (0,0), (-1,-1), 8),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+    ]))
+    elementos.append(tabla_rack)
+    elementos.append(Spacer(1, 0.1*inch))
+    
+    elementos.append(Paragraph("<b>Observaciones:</b>", cell_style))
+    elementos.append(Paragraph(inspeccion.observaciones_rack or 'Sin observaciones', cell_style))
+    elementos.append(Spacer(1, 0.2*inch))
+    
+    # ==================== ESTRUCTURAS ====================
+    elementos.append(Paragraph("Estructuras, Paneles Solares, Piolas de Viento, Neumáticos y otros", subtitulo_style))
+    
+    datos_estructuras = [
+        [Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style),
+         Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style)],
+        [Paragraph("Limpieza de Paneles", cell_style),
+         Paragraph("✓" if inspeccion.limpieza_paneles == 'OK' else "✗" if inspeccion.limpieza_paneles == 'NOK' else "-", cell_style),
+         Paragraph("Estado de Torre", cell_style),
+         Paragraph("✓" if inspeccion.estado_torre == 'OK' else "✗" if inspeccion.estado_torre == 'NOK' else "-", cell_style)],
+        [Paragraph("Estructura de P. Solares", cell_style),
+         Paragraph("✓" if inspeccion.estructura_paneles == 'OK' else "✗" if inspeccion.estructura_paneles == 'NOK' else "-", cell_style),
+         Paragraph("Estado Piolas de Viento", cell_style),
+         Paragraph("✓" if inspeccion.estado_piolas_viento == 'OK' else "✗" if inspeccion.estado_piolas_viento == 'NOK' else "-", cell_style)],
+        [Paragraph(f"Cantidad de Cuñas: {inspeccion.cantidad_cunas or '-'}", cell_style),
+         Paragraph("", cell_style),
+         Paragraph("Nivelación del Carro", cell_style),
+         Paragraph("✓" if inspeccion.nivelacion_carro == 'OK' else "✗" if inspeccion.nivelacion_carro == 'NOK' else "-", cell_style)],
+        [Paragraph("Checkpoints", cell_style),
+         Paragraph("✓" if inspeccion.checkpoints == 'OK' else "✗" if inspeccion.checkpoints == 'NOK' else "-", cell_style),
+         Paragraph("Gatas de Posicionamiento", cell_style),
+         Paragraph("✓" if inspeccion.gatas_posicionamiento == 'OK' else "✗" if inspeccion.gatas_posicionamiento == 'NOK' else "-", cell_style)],
+        [Paragraph("Presión de Neumáticos", cell_style),
+         Paragraph("✓" if inspeccion.presion_neumaticos == 'OK' else "✗" if inspeccion.presion_neumaticos == 'NOK' else "-", cell_style),
+         Paragraph("Manivelas Izaje de Gatas", cell_style),
+         Paragraph("✓" if inspeccion.manivelas_izaje == 'OK' else "✗" if inspeccion.manivelas_izaje == 'NOK' else "-", cell_style)],
+    ]
+    
+    tabla_estructuras = Table(datos_estructuras, colWidths=[1.8*inch, 1.0*inch, 1.8*inch, 1.0*inch])
+    tabla_estructuras.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0033a0')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('FONTSIZE', (0,0), (-1,-1), 8),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+    ]))
+    elementos.append(tabla_estructuras)
+    elementos.append(Spacer(1, 0.1*inch))
+    
+    elementos.append(Paragraph("<b>Observaciones:</b>", cell_style))
+    elementos.append(Paragraph(inspeccion.observaciones_estructuras or 'Sin observaciones', cell_style))
+    elementos.append(Spacer(1, 0.2*inch))
+    
+    # ==================== ESTADO FINAL ====================
+    elementos.append(Paragraph(f"<b>Estado del Informe:</b> {inspeccion.estado.upper()}", cell_style))
     elementos.append(Spacer(1, 0.3*inch))
     
     # Construir PDF
     doc.build(elementos)
     buffer.seek(0)
     
-    return send_file(buffer, as_attachment=True, download_name=f"inspeccion_cow_{inspeccion.id}.pdf", mimetype='application/pdf')
+    # Nombre del archivo: nombre_del_sitio_fecha.pdf
+    nombre_base = inspeccion.nombre_sitio.replace(" ", "_").replace("/", "_")[:50]
+    filename = f"{nombre_base}_{inspeccion.fecha.replace('/', '-')}.pdf"
+    
+    return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
 # 6. SEXTO crear tablas
 with app.app_context():
