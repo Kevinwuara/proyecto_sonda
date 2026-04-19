@@ -970,7 +970,7 @@ def generar_pdf(id):
         # ==================== GRUPO ELECTRÓGENO ====================
         # Verificar si es COW Light (no debe mostrar sección GE)
     es_cow_light = 'Light' in inspeccion.nombre_sitio
-    
+
     # Título dentro de la tabla (combinado)
     if not es_cow_light:
         titulo_ge = Paragraph("Grupo Electrógeno Cummins y Estanque de Combustible", 
@@ -1420,7 +1420,7 @@ def generar_pdf(id):
     ]))
     
     elementos.append(tabla_obs_fotos_estructuras)
-    elementos.append(Spacer(1, 5.8*inch))
+    elementos.append(Spacer(1, 2.0*inch))
 
         # ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (33 PUNTOS) ====================
     # Título principal de la sección DENTRO DE UNA TABLA
@@ -1516,7 +1516,6 @@ def generar_pdf(id):
         tabla = crear_tabla_foto(titulo, foto_nombre)
         if tabla is not None:  # Solo agregar si hay foto
             elementos.append(tabla)
-            elementos.append(Spacer(1, 1.0*inch))  # Espacio entre puntos
 
         # ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ====================
     # Verificar si existe al menos una mejora (descripción o foto)
