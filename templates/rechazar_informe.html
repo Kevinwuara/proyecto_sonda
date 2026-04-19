@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Rechazar Informe - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Rechazar Informe #{{ inspeccion.id }}</h1>
+        <p><strong>Sitio:</strong> {{ inspeccion.nombre_sitio }}</p>
+        <p><strong>Responsable:</strong> {{ inspeccion.responsable }}</p>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="motivo_rechazo">Motivo del Rechazo:</label>
+                <textarea name="motivo_rechazo" id="motivo_rechazo" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-rechazar">Confirmar Rechazo</button>
+                <a href="{{ url_for('ver_informes') }}" class="btn-volver">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

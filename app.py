@@ -164,6 +164,9 @@ class InspeccionCOW(db.Model):
     foto_mejora_4 = db.Column(db.String(200), nullable=True)
     descripcion_mejora_4 = db.Column(db.String(500), nullable=True)
 
+    # Motivo de Rechazo
+    motivo_rechazo = db.Column(db.String(500), nullable=True)
+
     # Estado y control
     estado = db.Column(db.String(20), default='pendiente')  # pendiente, aprobado, rechazado
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
@@ -618,7 +621,7 @@ def aprobar_informe(id):
     
     return redirect(url_for('ver_informes'))
 
-@app.route('/rechazar_informe/<int:id>')
+@app.route('/rechazar_informe/<int:id>', methods=['GET', 'POST'])
 def rechazar_informe(id):
     if 'username' not in session:
         return redirect(url_for('login'))
@@ -628,10 +631,15 @@ def rechazar_informe(id):
         return "Acceso denegado", 403
     
     inspeccion = InspeccionCOW.query.get_or_404(id)
-    inspeccion.estado = 'rechazado'
-    db.session.commit()
     
-    return redirect(url_for('ver_informes'))
+    if request.method == 'POST':
+        motivo = request.form.get('motivo_rechazo', '')
+        inspeccion.estado = 'rechazado'
+        inspeccion.motivo_rechazo = motivo
+        db.session.commit()
+        return redirect(url_for('ver_informes'))
+    
+    return render_template('rechazar_informe.html', inspeccion=inspeccion)
 
 @app.route('/editar_informe/<int:id>', methods=['GET', 'POST'])
 def editar_informe(id):

@@ -489,6 +489,19 @@ small {
 .estado-banner.rechazado {
     background-color: #dc3545;
     color: white;
+    text-align: center;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.motivo-rechazo-texto {
+    font-size: 0.9em;
+    font-weight: normal;
+    display: block;
+    margin-top: 5px;
 }
 
 .fotos-detalle {
