@@ -11,7 +11,7 @@ with app.app_context():
         tecnico = Usuario(
             username='tecnico',
             password=generate_password_hash('tec123'),
-            nombre='Carlos Técnico',
+            nombre='Técnico Soporte 1C',
             rol='tecnico',
             email='tecnico@sonda.cl'
         )
@@ -20,7 +20,7 @@ with app.app_context():
         supervisor = Usuario(
             username='supervisor',
             password=generate_password_hash('sup123'),
-            nombre='Ana Supervisora',
+            nombre='Supervisor de Terreno',
             rol='supervisor',
             email='supervisor@sonda.cl'
         )
