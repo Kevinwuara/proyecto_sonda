@@ -964,10 +964,16 @@ def generar_pdf(id):
     ]))
     elementos.append(tabla_principales)
     elementos.append(Spacer(1, 0.2*inch))
+
+        
     
         # ==================== GRUPO ELECTRÓGENO ====================
+        # Verificar si es COW Light (no debe mostrar sección GE)
+    es_cow_light = 'Light' in inspeccion.nombre_sitio
+    
     # Título dentro de la tabla (combinado)
-    titulo_ge = Paragraph("Grupo Electrógeno Cummins y Estanque de Combustible", 
+    if not es_cow_light:
+        titulo_ge = Paragraph("Grupo Electrógeno Cummins y Estanque de Combustible", 
                           ParagraphStyle('TituloGEStyle', parent=normal_style,
                                         alignment=TA_CENTER, fontSize=12,
                                         textColor=colors.HexColor("#000000"),
@@ -1435,36 +1441,37 @@ def generar_pdf(id):
     elementos.append(tabla_titulo_lev)
     
     def crear_tabla_foto(titulo, foto_nombre):
-        """Crea una tabla con título y una sola imagen"""
-        contenido_celda = []
-        contenido_celda.append(Paragraph(f"<b>{titulo}</b>", cell_style))
+        """Crea una tabla con título y una sola imagen (solo si hay foto válida)"""
+        # Si no hay foto, no mostrar nada
+        if not foto_nombre:
+            return None
         
-        if foto_nombre:
-            ruta_foto = os.path.join('static/uploads', foto_nombre)
-            if os.path.exists(ruta_foto):
-                try:
-                    img = ReportLabImage(ruta_foto, width=5*inch, height=3*inch)
-                    contenido_celda.append(img)
-                except:
-                    contenido_celda.append(Paragraph("(Error al cargar imagen)", cell_style))
-            else:
-                contenido_celda.append(Paragraph("(No se encontró la imagen)", cell_style))
-        else:
-            contenido_celda.append(Paragraph("(Sin foto)", cell_style))
+        ruta_foto = os.path.join('static/uploads', foto_nombre)
+        if not os.path.exists(ruta_foto):
+            return None
         
-        tabla_foto = Table([[contenido_celda]], colWidths=[7.0*inch])
-        tabla_foto.setStyle(TableStyle([
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-            ('FONTSIZE', (0,0), (-1,-1), 10),
-            ('GRID', (0,0), (-1,-1), 1, colors.black),
-            ('TOPPADDING', (0,0), (-1,-1), 8),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-            ('LEFTPADDING', (0,0), (-1,-1), 8),
-            ('RIGHTPADDING', (0,0), (-1,-1), 8),
-        ]))
-        return tabla_foto
+        try:
+            img = ReportLabImage(ruta_foto, width=5*inch, height=3*inch)
+            contenido_celda = [
+                Paragraph(f"<b>{titulo}</b>", cell_style),
+                img
+            ]
+            
+            tabla_foto = Table([[contenido_celda]], colWidths=[7.0*inch])
+            tabla_foto.setStyle(TableStyle([
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,0), (-1,-1), 10),
+                ('GRID', (0,0), (-1,-1), 1, colors.black),
+                ('TOPPADDING', (0,0), (-1,-1), 8),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                ('LEFTPADDING', (0,0), (-1,-1), 8),
+                ('RIGHTPADDING', (0,0), (-1,-1), 8),
+            ]))
+            return tabla_foto
+        except:
+            return None
     
     # Lista de 33 títulos con sus campos correspondientes
     puntos_fotos = [
@@ -1503,14 +1510,86 @@ def generar_pdf(id):
         (33, "33. Fotografía del sitio al término de los trabajos (Recordar llamar a NOC, informando la salida del sitio):", 'foto_levantamiento_33'),
     ]
     
-    # Generar cada punto
+    # Generar cada punto (solo si hay foto)
     for num, titulo, campo_foto in puntos_fotos:
         foto_nombre = getattr(inspeccion, campo_foto, None)
-        elementos.append(crear_tabla_foto(titulo, foto_nombre))
+        tabla = crear_tabla_foto(titulo, foto_nombre)
+        if tabla is not None:  # Solo agregar si hay foto
+            elementos.append(tabla)
+            elementos.append(Spacer(1, 1.0*inch))  # Espacio entre puntos
+
+        # ==================== LEVANTAMIENTO FOTOGRAFÍAS DE MEJORAS ====================
+    # Verificar si existe al menos una mejora (descripción o foto)
+    mejoras_lista = [
+        (inspeccion.descripcion_mejora_1, inspeccion.foto_mejora_1),
+        (inspeccion.descripcion_mejora_2, inspeccion.foto_mejora_2),
+        (inspeccion.descripcion_mejora_3, inspeccion.foto_mejora_3),
+        (inspeccion.descripcion_mejora_4, inspeccion.foto_mejora_4),
+    ]
     
-    # ==================== ESTADO FINAL ====================
-    elementos.append(Paragraph(f"<b>Estado del Informe:</b> {inspeccion.estado.upper()}", cell_style))
-    elementos.append(Spacer(1, 0.3*inch))
+    # Verificar si hay al menos una mejora con contenido
+    hay_mejoras = any(descripcion or foto for descripcion, foto in mejoras_lista)
+    
+    if hay_mejoras:
+        # Título principal de la sección DENTRO DE UNA TABLA
+        titulo_mejoras = Paragraph("Levantamiento fotografías de mejoras:", 
+                                    ParagraphStyle('TituloMejorasStyle', parent=normal_style,
+                                                  alignment=TA_CENTER, fontSize=12,
+                                                  textColor=colors.HexColor("#000000"),
+                                                  fontName='Helvetica-Bold'))
+        
+        tabla_titulo_mejoras = Table([[titulo_mejoras]], colWidths=[7.0*inch])
+        tabla_titulo_mejoras.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ]))
+        elementos.append(tabla_titulo_mejoras)
+        
+        def crear_tabla_mejora(descripcion, foto_nombre):
+            """Crea una tabla con descripción de mejora y su imagen"""
+            contenido_celda = []
+            
+            # Agregar descripción (si existe)
+            if descripcion and descripcion.strip():
+                contenido_celda.append(Paragraph(f"<b>Mejora:</b> {descripcion}", cell_style))
+            else:
+                contenido_celda.append(Paragraph("<b>Mejora:</b> (Sin descripción)", cell_style))
+            
+            # Agregar foto si existe
+            if foto_nombre:
+                ruta_foto = os.path.join('static/uploads', foto_nombre)
+                if os.path.exists(ruta_foto):
+                    try:
+                        img = ReportLabImage(ruta_foto, width=5*inch, height=3*inch)
+                        contenido_celda.append(img)
+                    except:
+                        contenido_celda.append(Paragraph("(Error al cargar imagen)", cell_style))
+                else:
+                    contenido_celda.append(Paragraph("(No se encontró la imagen)", cell_style))
+            else:
+                contenido_celda.append(Paragraph("(Sin foto)", cell_style))
+            
+            tabla_mejora = Table([[contenido_celda]], colWidths=[7.0*inch])
+            tabla_mejora.setStyle(TableStyle([
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,0), (-1,-1), 10),
+                ('GRID', (0,0), (-1,-1), 1, colors.black),
+                ('TOPPADDING', (0,0), (-1,-1), 8),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                ('LEFTPADDING', (0,0), (-1,-1), 8),
+                ('RIGHTPADDING', (0,0), (-1,-1), 8),
+            ]))
+            return tabla_mejora
+        
+        # Generar cada mejora
+        for descripcion, foto_nombre in mejoras_lista:
+            if descripcion or foto_nombre:
+                elementos.append(crear_tabla_mejora(descripcion or '', foto_nombre))
     
     # Construir PDF
     doc.build(elementos)
