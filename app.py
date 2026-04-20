@@ -1,21 +1,18 @@
-from flask import Flask, render_template, redirect, url_for, request, session
+from flask import Flask, render_template, redirect, url_for, request, session, send_file
 from forms import LoginForm
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
-from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime
+from werkzeug.security import check_password_hash
 from forms_cow import InspeccionCOWForm
 from werkzeug.utils import secure_filename
 import os
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch, mm
+from reportlab.lib.units import inch
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.enums import TA_CENTER
 from io import BytesIO
-from flask import send_file
 
 # 1. PRIMERO crear la aplicación Flask
 app = Flask(__name__)
@@ -38,7 +35,10 @@ class Usuario(db.Model):
     email = db.Column(db.String(100), nullable=True)
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Modelo de Inspección COW
+    def __repr__(self):
+        return f'<Usuario {self.username}>'
+
+# Modelo de Inspección COW
 class InspeccionCOW(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
@@ -177,31 +177,23 @@ class InspeccionCOW(db.Model):
     def __repr__(self):
         return f'<InspeccionCOW {self.id} - {self.nombre_sitio}>'
 
-    def __repr__(self):
-        return f'<Usuario {self.username}>'
-
 def calcular_fecha_turno(fecha_ingresada=None):
     # Si se ingresa una fecha (desde el formulario), usarla; si no, usar hoy
     if fecha_ingresada:
-        print(f"DEBUG - Función recibió fecha: {fecha_ingresada}")
         hoy = datetime.strptime(fecha_ingresada, '%Y-%m-%d')
     else:
         hoy = datetime.now()
-    
-    print(f"DEBUG - Fecha usada para cálculo: {hoy.strftime('%Y-%m-%d')}")
-    
+
     fecha_str = hoy.strftime('%d/%m/%Y')
     fecha_iso = hoy.strftime('%Y-%m-%d')
-    
+
     # Fecha base: 01/04/2026
     fecha_base = datetime(2026, 4, 1)
     diferencia = (hoy - fecha_base).days
-    print(f"DEBUG - Días desde fecha base: {diferencia}")
-    
+
     # Cada ciclo completo son 14 días
     dia_en_ciclo = diferencia % 14
-    print(f"DEBUG - Día en ciclo (0-13): {dia_en_ciclo}")
-    
+
     if dia_en_ciclo < 7:
         turno = "A"
         dia_turno = dia_en_ciclo + 1
@@ -210,9 +202,7 @@ def calcular_fecha_turno(fecha_ingresada=None):
         turno = "B"
         dia_turno = dia_en_ciclo - 6
         estado = f"Turno B 7x7: Día {dia_turno} de trabajo"
-    
-    print(f"DEBUG - Resultado: {estado}")
-    
+
     return fecha_str, fecha_iso, dia_turno, turno, estado
 
 @app.route('/calcular_turno', methods=['POST'])
@@ -481,77 +471,7 @@ def inspeccion_cow():
         db.session.add(nueva_inspeccion)
         db.session.commit()
         # ================================================================
-        
-        print("=" * 50)
-        print("NUEVA INSPECCIÓN COW - DATOS COMPLETOS")
-        print("=" * 50)
-        print(f"DEBUG - Fecha seleccionada: {fecha_seleccionada}")
-        print(f"DEBUG - Estado turno calculado: {estado_turno}")
-        print(f"Responsable: {form.responsable.data}")
-        print(f"Sitio: {form.nombre_sitio.data}")
-        print(f"Horómetro: {form.horometro.data}")
-        print(f"Hora Inicio: {form.hora_inicio.data} / Término: {form.hora_termino.data}")
-        print("-" * 30)
-        print("GE CUMMINS:")
-        print(f"  Horas Func (Valor Bajo): {form.horas_funcionamiento.data}")
-        print(f"  Cantidad Arranques: {form.cantidad_arranques.data}")
-        print(f"  Nivel Aceite: {form.nivel_aceite.data}")
-        print(f"  Nivel Combustible: {form.nivel_combustible.data}")
-        print(f"  Nivel Refrigerante: {form.nivel_refrigerante.data}")
-        print(f"  Próxima Mantención: {form.proxima_mantencion.data}")
-        print(f"  Estado GE Principal: {form.estado_ge_principal.data}")
-        print(f"  Uso GE Auxiliar: {form.uso_ge_auxiliar.data}")
-        print(f"  Limpieza GE Interior: {form.limpieza_ge_interior.data}")
-        print(f"  Limpieza Radiador: {form.limpieza_radiador.data}")
-        print(f"  Sistema Combustible: {form.sistema_combustible.data}")
-        print(f"  Arranque Automático: {form.arranque_automatico.data}")
-        print(f"  Limpieza Interior: {form.limpieza_interior.data}")
-        print(f"  Limpieza Exterior: {form.limpieza_exterior.data}")
-        print(f"  Cable 5p/4p: {form.cable_5p_4p.data}")
-        print(f"  Adaptador GE Aux: {form.adaptador_ge_aux.data}")
-        print("-" * 30)
-        print("RACK ENERGÍA:")
-        print(f"  Limpieza Rack Energía: {form.limpieza_rack_energia.data}")
-        print(f"  Estado Planta Vertiv: {form.estado_planta_vertiv.data}")
-        print(f"  Rectificador N1/N2/N3: {form.rectificador_n1.data}/{form.rectificador_n2.data}/{form.rectificador_n3.data}")
-        print(f"  Estado Air Scale: {form.estado_air_scale.data}")
-        print(f"  Estado Alarmas: {form.estado_alarmas.data}")
-        print(f"  Estado 7250-IXR: {form.estado_7250_ixr.data}")
-        print(f"  Estado FPFH: {form.estado_fpfh.data}")
-        print(f"  Conversor Solar N1/N2: {form.conversor_solar_n1.data}/{form.conversor_solar_n2.data}")
-        print(f"  Limpieza Rack Baterías: {form.limpieza_rack_baterias.data}")
-        print(f"  Estado Baterías: {form.estado_baterias.data}")
-        print(f"  Estado Inversor: {form.estado_inversor.data}")
-        print(f"  Estado Ventiladores: {form.estado_ventiladores.data}")
-        print(f"  Limpieza Rack Telecom: {form.limpieza_rack_telecom.data}")
-        print("-" * 30)
-        print("ESTRUCTURAS:")
-        print(f"  Limpieza Paneles: {form.limpieza_paneles.data}")
-        print(f"  Estructura Paneles: {form.estructura_paneles.data}")
-        print(f"  Cantidad Cuñas: {form.cantidad_cunas.data}")
-        print(f"  Checkpoints: {form.checkpoints.data}")
-        print(f"  Presión Neumáticos: {form.presion_neumaticos.data}")
-        print(f"  Estado Torre: {form.estado_torre.data}")
-        print(f"  Estado Piolas Viento: {form.estado_piolas_viento.data}")
-        print(f"  Nivelación Carro: {form.nivelacion_carro.data}")
-        print(f"  Gatas Posicionamiento: {form.gatas_posicionamiento.data}")
-        print(f"  Manivelas Izaje: {form.manivelas_izaje.data}")
-        print("-" * 30)
-        print("FOTOS GUARDADAS:")
-        for foto in fotos_guardadas:
-            print(f"  - {foto}")
-        print("FOTOS RACK GUARDADAS:")
-        for foto in fotos_rack:
-            print(f"  - {foto}")
-        print("FOTOS ESTRUCTURAS GUARDADAS:")
-        for foto in fotos_estructuras:
-            print(f"  - {foto}")
-        print("-" * 30)
-        print(f"Observaciones GE: {form.observaciones_ge.data}")
-        print(f"Observaciones Rack: {form.observaciones_rack.data}")
-        print(f"Observaciones Estructuras: {form.observaciones_estructuras.data}")
-        print("=" * 50)
-        
+
         mensaje = f"Inspección COW guardada correctamente (ID: {nueva_inspeccion.id})"
         return render_template('formularios/inspeccion_cow.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
     
@@ -979,20 +899,21 @@ def generar_pdf(id):
         # Verificar si es COW Light (no debe mostrar sección GE)
     es_cow_light = 'Light' in inspeccion.nombre_sitio
 
-    # Título dentro de la tabla (combinado)
+    # Mostrar tabla GE solo si no es COW Light
     if not es_cow_light:
+        # Título dentro de la tabla (combinado)
         titulo_ge = Paragraph("Grupo Electrógeno Cummins y Estanque de Combustible", 
                           ParagraphStyle('TituloGEStyle', parent=normal_style,
                                         alignment=TA_CENTER, fontSize=12,
                                         textColor=colors.HexColor("#000000"),
                                         fontName='Helvetica-Bold'))
-    
-    # Construir tabla GE completa (6 filas de datos + fila estado GE + fila uso GE)
-    # Estructura: [Campo1, Valor1, Campo2, OK, NOK]
-    
-    datos_ge = [
-        # Fila 0: Título (combinado)
-        [titulo_ge, "", "", ""],
+        
+        # Construir tabla GE completa (6 filas de datos + fila estado GE + fila uso GE)
+        # Estructura: [Campo1, Valor1, Campo2, OK, NOK]
+        
+        datos_ge = [
+            # Fila 0: Título (combinado)
+            [titulo_ge, "", "", ""],
         # Fila 1: Encabezados OK/NOK
         [Paragraph("", cell_style), Paragraph("", cell_style), Paragraph("", cell_style), 
          Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style)],
@@ -1032,118 +953,121 @@ def generar_pdf(id):
          Paragraph("<b>Limpieza Exterior</b>", cell_style),
          Paragraph("X" if inspeccion.limpieza_exterior == 'OK' else "", cell_style),
          Paragraph("X" if inspeccion.limpieza_exterior == 'NOK' else "", cell_style)],
-    ]
-    
-    # Crear tabla
-    tabla_ge = Table(datos_ge, colWidths=[2.8*inch, 0.9*inch, 2.3*inch, 0.5*inch, 0.5*inch])
-    tabla_ge.setStyle(TableStyle([
-        # Título combinado en la primera fila
-        ('SPAN', (0,0), (4,0)),
-        ('SPAN', (0,1), (2,1)),  # Combinar las 3 primeras columnas en la fila 1
-        ('ALIGN', (0,0), (-1,0), 'CENTER'),
-        ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
-        # Encabezados OK/NOK
-        ('TEXTCOLOR', (3,1), (4,1), colors.white),
-        # Estilos generales
-        ('ALIGN', (0,2), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-        ('FONTSIZE', (0,0), (-1,-1), 9),
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        # Alinear texto de la primera columna a la izquierda
-        ('ALIGN', (0,2), (0,-1), 'LEFT'),
-        ('ALIGN', (2,2), (2,-1), 'LEFT'),
-    ]))
-    
-    elementos.append(tabla_ge)
-    
-    # ==================== TABLA DE ESTADO Y USO GE (6 columnas, como la imagen) ====================
-    datos_estado_uso = [
-        [Paragraph("<b>Estado de GE Principal</b>", cell_style),
-         Paragraph(f"Auto {'✓' if inspeccion.estado_ge_principal == 'Auto' else '✗'}", cell_style),
-         Paragraph(f"Shutdown {'✓' if inspeccion.estado_ge_principal == 'Shutdown' else '✗'}", cell_style),
-         Paragraph("<b>Cable 5p/4p GE Auxiliar</b>", cell_style),
-         Paragraph(f"SI {'✓' if inspeccion.cable_5p_4p == 'SI' else '✗'}", cell_style),
-         Paragraph(f"NO {'✓' if inspeccion.cable_5p_4p == 'NO' else '✗'}", cell_style)],
-        [Paragraph("<b>Uso de GE Auxiliar</b>", cell_style),
-         Paragraph(f"SI {'✓' if inspeccion.uso_ge_auxiliar == 'SI' else '✗'}", cell_style),
-         Paragraph(f"NO {'✓' if inspeccion.uso_ge_auxiliar == 'NO' else '✗'}", cell_style),
-         Paragraph("<b>Cuenta con adapt. para GE Aux</b>", cell_style),
-         Paragraph(f"SI {'✓' if inspeccion.adaptador_ge_aux == 'SI' else '✗'}", cell_style),
-         Paragraph(f"NO {'✓' if inspeccion.adaptador_ge_aux == 'NO' else '✗'}", cell_style)],
-    ]
-    
-    tabla_estado_uso = Table(datos_estado_uso, colWidths=[2.0*inch, 0.7*inch, 0.7*inch, 2.0*inch, 0.8*inch, 0.8*inch])
-    tabla_estado_uso.setStyle(TableStyle([
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-        ('FONTSIZE', (0,0), (-1,-1), 9),
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('ALIGN', (0,0), (0,0), 'LEFT'),
-        ('ALIGN', (3,0), (3,0), 'LEFT'),
-    ]))
-    elementos.append(tabla_estado_uso)
-    
+        ]
+        
+        # Crear tabla
+        tabla_ge = Table(datos_ge, colWidths=[2.8*inch, 0.9*inch, 2.3*inch, 0.5*inch, 0.5*inch])
+        tabla_ge.setStyle(TableStyle([
+            # Título combinado en la primera fila
+            ('SPAN', (0,0), (4,0)),
+            ('SPAN', (0,1), (2,1)),  # Combinar las 3 primeras columnas en la fila 1
+            ('ALIGN', (0,0), (-1,0), 'CENTER'),
+            ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
+            # Encabezados OK/NOK
+            ('TEXTCOLOR', (3,1), (4,1), colors.white),
+            # Estilos generales
+            ('ALIGN', (0,2), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            # Alinear texto de la primera columna a la izquierda
+            ('ALIGN', (0,2), (0,-1), 'LEFT'),
+            ('ALIGN', (2,2), (2,-1), 'LEFT'),
+        ]))
+        
+        elementos.append(tabla_ge)
+        
+        # ==================== TABLA DE ESTADO Y USO GE (6 columnas, como la imagen) ====================
+        datos_estado_uso = [
+            [Paragraph("<b>Estado de GE Principal</b>", cell_style),
+             Paragraph(f"Auto {'✓' if inspeccion.estado_ge_principal == 'Auto' else '✗'}", cell_style),
+             Paragraph(f"Shutdown {'✓' if inspeccion.estado_ge_principal == 'Shutdown' else '✗'}", cell_style),
+             Paragraph("<b>Cable 5p/4p GE Auxiliar</b>", cell_style),
+             Paragraph(f"SI {'✓' if inspeccion.cable_5p_4p == 'SI' else '✗'}", cell_style),
+             Paragraph(f"NO {'✓' if inspeccion.cable_5p_4p == 'NO' else '✗'}", cell_style)],
+            [Paragraph("<b>Uso de GE Auxiliar</b>", cell_style),
+             Paragraph(f"SI {'✓' if inspeccion.uso_ge_auxiliar == 'SI' else '✗'}", cell_style),
+             Paragraph(f"NO {'✓' if inspeccion.uso_ge_auxiliar == 'NO' else '✗'}", cell_style),
+             Paragraph("<b>Cuenta con adapt. para GE Aux</b>", cell_style),
+             Paragraph(f"SI {'✓' if inspeccion.adaptador_ge_aux == 'SI' else '✗'}", cell_style),
+             Paragraph(f"NO {'✓' if inspeccion.adaptador_ge_aux == 'NO' else '✗'}", cell_style)],
+        ]
+        
+        tabla_estado_uso = Table(datos_estado_uso, colWidths=[2.0*inch, 0.7*inch, 0.7*inch, 2.0*inch, 0.8*inch, 0.8*inch])
+        tabla_estado_uso.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('ALIGN', (0,0), (0,0), 'LEFT'),
+            ('ALIGN', (3,0), (3,0), 'LEFT'),
+        ]))
+        elementos.append(tabla_estado_uso)
+        
         # Tabla con borde para Observaciones y fotos (ancho completo)
-    # Observaciones en una sola fila: etiqueta y texto juntos
-    texto_observaciones = inspeccion.observaciones_ge or 'Sin observaciones'
+        # Observaciones en una sola fila: etiqueta y texto juntos
+        texto_observaciones = inspeccion.observaciones_ge or 'Sin observaciones'
+        
+        datos_obs_fotos = [
+            [Paragraph(f"<b>Observaciones:</b> {texto_observaciones}", cell_style)],
+        ]
+        
+        # Agregar fotos dentro del mismo cuadro (título e imagen en la misma celda usando tabla interna)
+        fotos_ge = [('foto_1', 'Foto 1'), ('foto_2', 'Foto 2'), ('foto_3', 'Foto 3')]
+        for campo, titulo in fotos_ge:
+            foto_nombre = getattr(inspeccion, campo, None)
+            if foto_nombre:
+                ruta_foto = os.path.join('static/uploads', foto_nombre)
+                if os.path.exists(ruta_foto):
+                    try:
+                        from reportlab.platypus import Image as ReportLabImage
+                        img = ReportLabImage(ruta_foto, width=5*inch, height=3*inch)
+                        
+                        # Crear tabla interna de 2 filas: título arriba, imagen abajo (pero todo en una celda)
+                        contenido_tabla = Table([
+                            [Paragraph(f"<b>{titulo}:</b>", cell_style)],
+                            [img]
+                        ], colWidths=[5.5*inch])
+                        contenido_tabla.setStyle(TableStyle([
+                            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                            ('GRID', (0,0), (-1,-1), 0, colors.white),
+                            ('TOPPADDING', (0,0), (-1,-1), 2),
+                            ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+                        ]))
+                        
+                        datos_obs_fotos.append([contenido_tabla])
+                    except Exception as e:
+                        print(f"Error al cargar foto {campo}: {e}")
+                else:
+                    # Si el archivo no existe, no mostrar nada
+                    pass
+            # Si no hay foto, no se agrega nada
+        
+        # Crear tabla con bordes negros
+        tabla_obs_fotos = Table(datos_obs_fotos, colWidths=[7.0*inch])
+        tabla_obs_fotos.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('LEFTPADDING', (0,0), (-1,-1), 8),
+            ('RIGHTPADDING', (0,0), (-1,-1), 8),
+        ]))
+        
+        elementos.append(tabla_obs_fotos)
     
-    datos_obs_fotos = [
-        [Paragraph(f"<b>Observaciones:</b> {texto_observaciones}", cell_style)],
-    ]
+    # Fin de la sección GE (solo para COW normal, no Light)
     
-            # Agregar fotos dentro del mismo cuadro (título e imagen en la misma celda usando tabla interna)
-    fotos_ge = [('foto_1', 'Foto 1'), ('foto_2', 'Foto 2'), ('foto_3', 'Foto 3')]
-    for campo, titulo in fotos_ge:
-        foto_nombre = getattr(inspeccion, campo, None)
-        if foto_nombre:
-            ruta_foto = os.path.join('static/uploads', foto_nombre)
-            if os.path.exists(ruta_foto):
-                try:
-                    from reportlab.platypus import Image as ReportLabImage
-                    img = ReportLabImage(ruta_foto, width=5*inch, height=3*inch)
-                    
-                    # Crear tabla interna de 2 filas: título arriba, imagen abajo (pero todo en una celda)
-                    contenido_tabla = Table([
-                        [Paragraph(f"<b>{titulo}:</b>", cell_style)],
-                        [img]
-                    ], colWidths=[5.5*inch])
-                    contenido_tabla.setStyle(TableStyle([
-                        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-                        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                        ('GRID', (0,0), (-1,-1), 0, colors.white),
-                        ('TOPPADDING', (0,0), (-1,-1), 2),
-                        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
-                    ]))
-                    
-                    datos_obs_fotos.append([contenido_tabla])
-                except Exception as e:
-                    print(f"Error al cargar foto {campo}: {e}")
-            else:
-                # Si el archivo no existe, no mostrar nada
-                pass
-        # Si no hay foto, no se agrega nada
-    
-    # Crear tabla con bordes negros
-    tabla_obs_fotos = Table(datos_obs_fotos, colWidths=[7.0*inch])
-    tabla_obs_fotos.setStyle(TableStyle([
-        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-        ('FONTSIZE', (0,0), (-1,-1), 10),
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('LEFTPADDING', (0,0), (-1,-1), 8),
-        ('RIGHTPADDING', (0,0), (-1,-1), 8),
-    ]))
-    
-    elementos.append(tabla_obs_fotos)
     elementos.append(Spacer(1, 2.5*inch))
     
         # ==================== RACK ENERGÍA ====================
@@ -1616,14 +1540,4 @@ with app.app_context():
 if __name__ == '__main__':
     app.run(debug=True)
 
-# Configuración para carga de imágenes (sin flask-uploads)
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Crear carpeta de uploads si no existe
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
