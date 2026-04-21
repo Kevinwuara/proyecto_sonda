@@ -11,23 +11,8 @@ class InspeccionCOWForm(FlaskForm):
         ('Luis Diaz', 'Luis Diaz')
     ], validators=[DataRequired()])
     
-    nombre_sitio = SelectField('Nombre del Sitio *', choices=[
-        ('COW 01 HD (Esperanza Sur) Área Autónoma', 'COW 01 HD (Esperanza Sur) Área Autónoma'),
-        ('COW 02 HD (Esperanza Sur) Área Convencional', 'COW 02 HD (Esperanza Sur) Área Convencional'),
-        ('COW 03 HD (Esperanza Sur) Área Convencional', 'COW 03 HD (Esperanza Sur) Área Convencional'),
-        ('COW 04 HD (Esperanza Sur) Área Convencional', 'COW 04 HD (Esperanza Sur) Área Convencional'),
-        ('COW 05 FAST SITE (Esperanza sur) Fuera Área Mina', 'COW 05 FAST SITE (Esperanza sur) Fuera Área Mina'),
-        ('COW 06 HD (Esperanza Sur) Área Autónoma', 'COW 06 HD (Esperanza Sur) Área Autónoma'),
-        ('COW 09 HD (OXE Encuentro) Fuera Área Mina', 'COW 09 HD (OXE Encuentro) Fuera Área Mina'),
-        ('COW 10 HD (OXE Encuentro) Fuera Área Mina', 'COW 10 HD (OXE Encuentro) Fuera Área Mina'),
-        ('COW 11 Light (OXE Encuentro) Área Mina', 'COW 11 Light (OXE Encuentro) Área Mina'),
-        ('COW 13 HD (OXE Encuentro) Área Mina', 'COW 13 HD (OXE Encuentro) Área Mina'),
-        ('COW 14 HD (OXE Encuentro) Área Mina', 'COW 14 HD (OXE Encuentro) Área Mina'),
-        ('COW 19 LIGHT (Esperanza sur) Área Convencional', 'COW 19 LIGHT (Esperanza sur) Área Convencional'),
-        ('COW 20 LIGHT (Esperanza Sur) Área Convencional', 'COW 20 LIGHT (Esperanza Sur) Área Convencional'),
-        ('COW 21 LIGHT (Esperanza Sur) Área Autónoma', 'COW 21 LIGHT (Esperanza Sur) Área Autónoma'),
-        ('COW 22 LIGHT (Esperanza sur) Área Autónoma', 'COW 22 LIGHT (Esperanza sur) Área Autónoma')
-    ], validators=[DataRequired()])
+        # Nombre del Sitio - Seleccionable desde base de datos (se llena dinámicamente)
+    nombre_sitio = SelectField('Nombre del Sitio *', choices=[], validators=[DataRequired()])
     
     horometro = IntegerField('Horómetro (Valor Alto) *', validators=[DataRequired(), NumberRange(min=0)])
     hora_inicio = StringField('Hora Inicio *', validators=[DataRequired(), Length(min=5, max=5)])

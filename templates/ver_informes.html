@@ -30,7 +30,7 @@
                     <tr>
                         <td>{{ ins.id }}</td>
                         <td>{{ ins.fecha }} (Día {{ ins.dia_turno }})</td>
-                        <td>{{ ins.nombre_sitio[:50] }}...</td>
+                        <td>{{ ins.sitio_ref.nombre_sitio[:50] if ins.sitio_ref else 'N/A' }}...</td>
                         <td>{{ ins.responsable }}</td>
                         <td>
                             <span class="estado {{ ins.estado }}">

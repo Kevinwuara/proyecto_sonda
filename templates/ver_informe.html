@@ -27,7 +27,7 @@
             <legend>📋 Datos Principales</legend>
             <div class="detalle-grid">
                 <div><strong>Responsable:</strong> {{ inspeccion.responsable }}</div>
-                <div><strong>Nombre del Sitio:</strong> {{ inspeccion.nombre_sitio }}</div>
+                <div><strong>Nombre del Sitio:</strong> {{ inspeccion.sitio_ref.nombre_sitio if inspeccion.sitio_ref else 'N/A' }}</div>
                 <div><strong>Horómetro (Valor Alto):</strong> {{ inspeccion.horometro }}</div>
                 <div><strong>Fecha:</strong> {{ inspeccion.fecha }} (Día {{ inspeccion.dia_turno }})</div>
                 <div><strong>Hora Inicio:</strong> {{ inspeccion.hora_inicio }}</div>

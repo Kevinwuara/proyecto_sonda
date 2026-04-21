@@ -42,10 +42,10 @@ class Usuario(db.Model):
 class InspeccionCOW(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    sitio_id = db.Column(db.Integer, db.ForeignKey('sitio.id'), nullable=True)
     fecha = db.Column(db.String(20), nullable=False)
     dia_turno = db.Column(db.Integer, nullable=False)
     responsable = db.Column(db.String(50), nullable=False)
-    nombre_sitio = db.Column(db.String(150), nullable=False)
     horometro = db.Column(db.Integer, nullable=False)
     hora_inicio = db.Column(db.String(10), nullable=False)
     hora_termino = db.Column(db.String(10), nullable=False)
@@ -176,6 +176,21 @@ class InspeccionCOW(db.Model):
     
     def __repr__(self):
         return f'<InspeccionCOW {self.id} - {self.nombre_sitio}>'
+    
+    # Modelo de Sitio (catálogo de COWs)
+class Sitio(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre_sitio = db.Column(db.String(150), unique=True, nullable=False)
+    area = db.Column(db.String(50), nullable=True)  # Ej: "Área Autónoma", "Área Convencional", "Fuera Área Mina"
+    tipo = db.Column(db.String(20), nullable=True)  # Ej: "HD", "LIGHT", "FAST SITE"
+    ubicacion = db.Column(db.String(100), nullable=True)  # Ej: "Esperanza Sur", "OXE Encuentro"
+    activo = db.Column(db.Boolean, default=True)
+    
+    # Relación con InspeccionCOW (un sitio tiene muchas inspecciones)
+    inspecciones = db.relationship('InspeccionCOW', backref='sitio_ref', lazy=True)
+    
+    def __repr__(self):
+        return f'<Sitio {self.nombre_sitio}>'
 
 def calcular_fecha_turno(fecha_ingresada=None):
     # Si se ingresa una fecha (desde el formulario), usarla; si no, usar hoy
@@ -263,6 +278,10 @@ def inspeccion_cow():
         return redirect(url_for('login'))
     
     form = InspeccionCOWForm()
+
+        # Cargar opciones de sitios desde la base de datos
+    sitios = Sitio.query.filter_by(activo=True).all()
+    form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
 
     # Inicializar variables
     fecha_actual = None
@@ -362,7 +381,7 @@ def inspeccion_cow():
             fecha=fecha_actual,
             dia_turno=dia_turno,
             responsable=form.responsable.data,
-            nombre_sitio=form.nombre_sitio.data,
+            sitio_id=int(form.nombre_sitio.data),
             horometro=form.horometro.data,
             hora_inicio=form.hora_inicio.data,
             hora_termino=form.hora_termino.data,
@@ -574,6 +593,10 @@ def editar_informe(id):
         return "No tienes permiso para editar este informe", 403
     
     form = InspeccionCOWForm()
+
+        # Cargar opciones de sitios desde la base de datos
+    sitios = Sitio.query.filter_by(activo=True).all()
+    form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
     
     if request.method == 'POST' and form.validate_on_submit():
         # Obtener fecha
@@ -587,7 +610,7 @@ def editar_informe(id):
         inspeccion.fecha = fecha_actual
         inspeccion.dia_turno = dia_turno
         inspeccion.responsable = form.responsable.data
-        inspeccion.nombre_sitio = form.nombre_sitio.data
+        inspeccion.sitio_id = int(form.nombre_sitio.data)
         inspeccion.horometro = form.horometro.data
         inspeccion.hora_inicio = form.hora_inicio.data
         inspeccion.hora_termino = form.hora_termino.data
@@ -709,7 +732,7 @@ def editar_informe(id):
     # GET request - Cargar datos existentes en el formulario
     if request.method == 'GET':
         form.responsable.data = inspeccion.responsable
-        form.nombre_sitio.data = inspeccion.nombre_sitio
+        form.nombre_sitio.data = str(inspeccion.sitio_id) if inspeccion.sitio_id else ''
         form.horometro.data = inspeccion.horometro
         form.hora_inicio.data = inspeccion.hora_inicio
         form.hora_termino.data = inspeccion.hora_termino
@@ -873,7 +896,7 @@ def generar_pdf(id):
         [Paragraph("<b>DATOS PRINCIPALES</b>", titulo_tabla_style), ""],
         [Paragraph(f"<b>Responsable:</b> {inspeccion.responsable}", cell_style),
          Paragraph(f"<b>Fecha:</b> {inspeccion.fecha} (Día {inspeccion.dia_turno})", cell_style)],
-        [Paragraph(f"<b>Nombre del Sitio:</b> {inspeccion.nombre_sitio}", cell_style),
+        [Paragraph(f"<b>Nombre del Sitio:</b> {inspeccion.sitio_ref.nombre_sitio if inspeccion.sitio_ref else 'N/A'}", cell_style),
          Paragraph(f"<b>Hora Inicio:</b> {inspeccion.hora_inicio}", cell_style)],
         [Paragraph(f"<b>Horómetro:</b> {inspeccion.horometro}", cell_style),
          Paragraph(f"<b>Hora Término:</b> {inspeccion.hora_termino}", cell_style)],
@@ -893,11 +916,10 @@ def generar_pdf(id):
     elementos.append(tabla_principales)
     elementos.append(Spacer(1, 0.2*inch))
 
-        
-    
         # ==================== GRUPO ELECTRÓGENO ====================
-        # Verificar si es COW Light (no debe mostrar sección GE)
-    es_cow_light = 'Light' in inspeccion.nombre_sitio
+    # Verificar si es COW Light (no debe mostrar sección GE)
+    nombre_sitio_str = inspeccion.sitio_ref.nombre_sitio if inspeccion.sitio_ref else ''
+    es_cow_light = 'Light' in nombre_sitio_str
 
     # Mostrar tabla GE solo si no es COW Light
     if not es_cow_light:
@@ -1527,7 +1549,8 @@ def generar_pdf(id):
     buffer.seek(0)
     
     # Nombre del archivo: nombre_del_sitio_fecha.pdf
-    nombre_base = inspeccion.nombre_sitio.replace(" ", "_").replace("/", "_")[:50]
+    nombre_sitio_pdf = inspeccion.sitio_ref.nombre_sitio if inspeccion.sitio_ref else 'sin_sitio'
+    nombre_base = nombre_sitio_pdf.replace(" ", "_").replace("/", "_")[:50]
     filename = f"{nombre_base}_{inspeccion.fecha.replace('/', '-')}.pdf"
     
     return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
