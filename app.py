@@ -191,6 +191,22 @@ class Sitio(db.Model):
     
     def __repr__(self):
         return f'<Sitio {self.nombre_sitio}>'
+    
+# Modelo de Fotografia (normalizado)
+class Fotografia(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    inspeccion_id = db.Column(db.Integer, db.ForeignKey('inspeccion_cow.id'), nullable=False)
+    seccion = db.Column(db.String(50), nullable=False)  # 'ge', 'rack', 'estructura', 'levantamiento', 'mejora'
+    punto_numero = db.Column(db.Integer, nullable=True)  # 1-33 para levantamiento, 1-4 para mejoras
+    titulo = db.Column(db.String(200), nullable=True)  # Para descripción de mejoras
+    ruta_archivo = db.Column(db.String(200), nullable=False)
+    fecha_subida = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relación
+    inspeccion = db.relationship('InspeccionCOW', backref='fotografias', lazy=True)
+    
+    def __repr__(self):
+        return f'<Fotografia {self.seccion}_{self.punto_numero}>'
 
 def calcular_fecha_turno(fecha_ingresada=None):
     # Si se ingresa una fecha (desde el formulario), usarla; si no, usar hoy
@@ -291,6 +307,11 @@ def inspeccion_cow():
     estado_turno = None
     
     if request.method == 'POST' and form.validate_on_submit():
+        print("=== VALORES RECIBIDOS ===")
+        print(f"obs_ge: '{form.observaciones_ge.data}'")
+        print(f"obs_rack: '{form.observaciones_rack.data}'")
+        print(f"obs_est: '{form.observaciones_estructuras.data}'")
+        print("========================")
         fecha_seleccionada = request.form.get('fecha')
         if fecha_seleccionada:
             fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno(fecha_seleccionada)
@@ -486,10 +507,88 @@ def inspeccion_cow():
 
             estado='pendiente'
         )
+
+        print("=== VALORES ASIGNADOS ===")
+        print(f"obs_ge: '{nueva_inspeccion.observaciones_ge}'")
+        print(f"obs_rack: '{nueva_inspeccion.observaciones_rack}'")
+        print(f"obs_est: '{nueva_inspeccion.observaciones_estructuras}'")
+        print("========================")
         
+                # Guardar la inspección primero
         db.session.add(nueva_inspeccion)
+        db.session.commit()  # ← Esto asigna el ID a nueva_inspeccion.id
+
+                # Verificar que se guardó en la BD
+        inspeccion_guardada = InspeccionCOW.query.get(nueva_inspeccion.id)
+        print("=== VERIFICACIÓN POST-COMMIT ===")
+        print(f"ID: {inspeccion_guardada.id}")
+        print(f"obs_ge en BD: '{inspeccion_guardada.observaciones_ge}'")
+        print(f"obs_rack en BD: '{inspeccion_guardada.observaciones_rack}'")
+        print(f"obs_est en BD: '{inspeccion_guardada.observaciones_estructuras}'")
+        print("================================")
+        
+        # ==================== AHORA SÍ, GUARDAR FOTOGRAFÍAS ====================
+        # (después del commit, cuando el ID ya existe)
+        
+        # 1. Fotos GE
+        for i, foto_nombre in enumerate(fotos_guardadas, 1):
+            if foto_nombre:
+                foto = Fotografia(
+                    inspeccion_id=nueva_inspeccion.id,  # ← Ahora tiene ID válido
+                    seccion='ge',
+                    punto_numero=i,
+                    ruta_archivo=foto_nombre
+                )
+                db.session.add(foto)
+        
+        # 2. Fotos Rack
+        for i, foto_nombre in enumerate(fotos_rack, 1):
+            if foto_nombre:
+                foto = Fotografia(
+                    inspeccion_id=nueva_inspeccion.id,
+                    seccion='rack',
+                    punto_numero=i,
+                    ruta_archivo=foto_nombre
+                )
+                db.session.add(foto)
+        
+        # 3. Fotos Estructuras
+        for i, foto_nombre in enumerate(fotos_estructuras, 1):
+            if foto_nombre:
+                foto = Fotografia(
+                    inspeccion_id=nueva_inspeccion.id,
+                    seccion='estructura',
+                    punto_numero=i,
+                    ruta_archivo=foto_nombre
+                )
+                db.session.add(foto)
+        
+        # 4. Fotos Levantamiento
+        for i, foto_nombre in enumerate(fotos_levantamiento, 1):
+            if foto_nombre and foto_nombre != 'None':
+                foto = Fotografia(
+                    inspeccion_id=nueva_inspeccion.id,
+                    seccion='levantamiento',
+                    punto_numero=i,
+                    ruta_archivo=foto_nombre
+                )
+                db.session.add(foto)
+        
+        # 5. Fotos Mejoras
+        for i, foto_nombre in enumerate(fotos_mejora, 1):
+            if foto_nombre and foto_nombre != 'None':
+                desc = descripciones_mejora[i-1] if i-1 < len(descripciones_mejora) else ''
+                foto = Fotografia(
+                    inspeccion_id=nueva_inspeccion.id,
+                    seccion='mejora',
+                    punto_numero=i,
+                    titulo=desc,
+                    ruta_archivo=foto_nombre
+                )
+                db.session.add(foto)
+        
+        # Guardar todas las fotos
         db.session.commit()
-        # ================================================================
 
         mensaje = f"Inspección COW guardada correctamente (ID: {nueva_inspeccion.id})"
         return render_template('formularios/inspeccion_cow.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
