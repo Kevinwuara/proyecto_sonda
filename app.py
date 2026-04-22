@@ -208,6 +208,23 @@ class Fotografia(db.Model):
     def __repr__(self):
         return f'<Fotografia {self.seccion}_{self.punto_numero}>'
 
+        # Modelo de Mejora (normalizado, 4 mejoras por inspección)
+class Mejora(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    inspeccion_id = db.Column(db.Integer, db.ForeignKey('inspeccion_cow.id'), nullable=False)
+    numero = db.Column(db.Integer, nullable=False)  # 1, 2, 3, 4
+    descripcion = db.Column(db.String(500), nullable=True)
+    ruta_foto = db.Column(db.String(200), nullable=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relación
+    inspeccion = db.relationship('InspeccionCOW', backref='mejoras', lazy=True)
+    
+    def __repr__(self):
+        return f'<Mejora {self.numero} de inspección {self.inspeccion_id}>'
+
+        
+
 def calcular_fecha_turno(fecha_ingresada=None):
     # Si se ingresa una fecha (desde el formulario), usarla; si no, usar hoy
     if fecha_ingresada:
@@ -586,6 +603,19 @@ def inspeccion_cow():
                     ruta_archivo=foto_nombre
                 )
                 db.session.add(foto)
+
+        # Guardar Mejoras en tabla normalizada
+        for i in range(1, 5):
+            desc = descripciones_mejora[i-1] if i-1 < len(descripciones_mejora) else ''
+            foto = fotos_mejora[i-1] if i-1 < len(fotos_mejora) else None
+            
+            mejora = Mejora(
+                inspeccion_id=nueva_inspeccion.id,
+                numero=i,
+                descripcion=desc,
+                ruta_foto=foto
+            )
+            db.session.add(mejora)
         
         # Guardar todas las fotos
         db.session.commit()
