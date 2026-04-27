@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, session, send_file
+from flask import Flask, render_template, redirect, url_for, request, session, send_file, jsonify
 from forms import LoginForm
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -930,6 +930,125 @@ def borrar_informe(id):
     db.session.commit()
     
     return redirect(url_for('ver_informes'))
+
+# ==================== API REST ====================
+
+# 1. Obtener todas las inspecciones (GET)
+@app.route('/api/inspecciones', methods=['GET'])
+def api_get_inspecciones():
+    if 'username' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+    
+    if usuario_actual.rol == 'supervisor':
+        inspecciones = InspeccionCOW.query.all()
+    else:
+        inspecciones = InspeccionCOW.query.filter_by(usuario_id=usuario_actual.id).all()
+    
+    resultado = []
+    for ins in inspecciones:
+        # Obtener nombre del sitio desde la relación
+        sitio = Sitio.query.get(ins.sitio_id) if ins.sitio_id else None
+        nombre_sitio = sitio.nombre_sitio if sitio else 'Desconocido'
+        
+        resultado.append({
+            'id': ins.id,
+            'fecha': ins.fecha,
+            'sitio': nombre_sitio,
+            'responsable': ins.responsable,
+            'estado': ins.estado
+        })
+    
+    return jsonify(resultado)
+
+# 2. Obtener una inspección específica por ID (GET)
+@app.route('/api/inspecciones/<int:id>', methods=['GET'])
+def api_get_inspeccion(id):
+    if 'username' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    inspeccion = InspeccionCOW.query.get_or_404(id)
+    usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+    
+    if usuario_actual.rol != 'supervisor' and inspeccion.usuario_id != usuario_actual.id:
+        return jsonify({'error': 'No tienes permiso para ver esta inspección'}), 403
+    
+    # Obtener nombre del sitio
+    sitio = Sitio.query.get(inspeccion.sitio_id) if inspeccion.sitio_id else None
+    nombre_sitio = sitio.nombre_sitio if sitio else 'Desconocido'
+    
+    # Obtener fotos de la inspección
+    fotos = []
+    for foto in inspeccion.fotografias:
+        fotos.append({
+            'seccion': foto.seccion,
+            'punto_numero': foto.punto_numero,
+            'ruta': foto.ruta_archivo
+        })
+    
+    # Obtener mejoras
+    mejoras = []
+    for mejora in inspeccion.mejoras:
+        mejoras.append({
+            'numero': mejora.numero,
+            'descripcion': mejora.descripcion,
+            'ruta_foto': mejora.ruta_foto
+        })
+    
+    resultado = {
+        'id': inspeccion.id,
+        'fecha': inspeccion.fecha,
+        'dia_turno': inspeccion.dia_turno,
+        'sitio': nombre_sitio,
+        'responsable': inspeccion.responsable,
+        'horometro': inspeccion.horometro,
+        'hora_inicio': inspeccion.hora_inicio,
+        'hora_termino': inspeccion.hora_termino,
+        'horas_funcionamiento': inspeccion.horas_funcionamiento,
+        'cantidad_arranques': inspeccion.cantidad_arranques,
+        'nivel_aceite': inspeccion.nivel_aceite,
+        'nivel_combustible': inspeccion.nivel_combustible,
+        'observaciones_ge': inspeccion.observaciones_ge,
+        'estado': inspeccion.estado,
+        'fotos': fotos,
+        'mejoras': mejoras
+    }
+    
+    return jsonify(resultado)
+
+# 3. Obtener todos los sitios (GET)
+@app.route('/api/sitios', methods=['GET'])
+def api_get_sitios():
+    if 'username' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    sitios = Sitio.query.filter_by(activo=True).all()
+    resultado = [{'id': s.id, 'nombre': s.nombre_sitio, 'area': s.area, 'tipo': s.tipo} for s in sitios]
+    
+    return jsonify(resultado)
+
+# 4. Obtener estadísticas (solo supervisor)
+@app.route('/api/estadisticas', methods=['GET'])
+def api_get_estadisticas():
+    if 'username' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+    if usuario_actual.rol != 'supervisor':
+        return jsonify({'error': 'Solo supervisores pueden ver estadísticas'}), 403
+    
+    total = InspeccionCOW.query.count()
+    pendientes = InspeccionCOW.query.filter_by(estado='pendiente').count()
+    aprobados = InspeccionCOW.query.filter_by(estado='aprobado').count()
+    rechazados = InspeccionCOW.query.filter_by(estado='rechazado').count()
+    
+    return jsonify({
+        'total': total,
+        'pendientes': pendientes,
+        'aprobados': aprobados,
+        'rechazados': rechazados
+    })
 
 @app.route('/generar_pdf/<int:id>')
 def generar_pdf(id):
