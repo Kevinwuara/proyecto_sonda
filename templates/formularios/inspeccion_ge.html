@@ -182,6 +182,111 @@
                     </div>
                 </div>
             </fieldset>
+                        <!-- Estado Breaker y Baterías -->
+            <fieldset>
+                <legend>🔋 Estado Breaker y Baterías</legend>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_pantalla.label }}
+                        {{ form.estado_pantalla(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_parada_emergencia.label }}
+                        {{ form.estado_parada_emergencia(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_corta_corriente.label }}
+                        {{ form.estado_corta_corriente(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_selector.label }}
+                        {{ form.estado_selector(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_bornes_bateria.label }}
+                        {{ form.estado_bornes_bateria(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_ramal_cables.label }}
+                        {{ form.estado_ramal_cables(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_enchufe.label }}
+                        {{ form.estado_enchufe(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_cebador.label }}
+                        {{ form.estado_cebador(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_mangueras.label }}
+                        {{ form.estado_mangueras(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_alarmas.label }}
+                        {{ form.estado_alarmas(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_extintor.label }}
+                        {{ form.estado_extintor(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_puertas.label }}
+                        {{ form.estado_puertas(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_baterias.label }}
+                        {{ form.estado_baterias(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_ventilador.label }}
+                        {{ form.estado_ventilador(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.observaciones_breaker.label }}
+                    {{ form.observaciones_breaker(class="form-control", rows="3") }}
+                </div>
+
+                <!-- Sección de Fotografías Breaker -->
+                <div class="form-group">
+                    <label>📸 Fotografías de respaldo (máximo 3)</label>
+                    <div class="fotos-row">
+                        <div class="foto-item">
+                            <label>Foto Breaker 1</label>
+                            <input type="file" name="foto_breaker_1" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto Breaker 2</label>
+                            <input type="file" name="foto_breaker_2" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto Breaker 3</label>
+                            <input type="file" name="foto_breaker_3" accept="image/*" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn-submit") }}
             </div>

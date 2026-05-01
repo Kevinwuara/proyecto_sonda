@@ -675,9 +675,24 @@ def inspeccion_ge():
         print(f"Limpieza Exterior: {form.limpieza_exterior.data}")
         print(f"Cable 5p/4p: {form.cable_5p_4p.data}")
         print(f"Observaciones: {form.observaciones.data}")
+        print(f"Estado de Pantalla: {form.estado_pantalla.data}")
+        print(f"Estado de Parada Emergencia: {form.estado_parada_emergencia.data}")
+        print(f"Estado de Corta Corriente: {form.estado_corta_corriente.data}")
+        print(f"Estado de Selector: {form.estado_selector.data}")
+        print(f"Estado de Bornes de Batería: {form.estado_bornes_bateria.data}")
+        print(f"Estado de Ramal de Cables: {form.estado_ramal_cables.data}")
+        print(f"Estado de Enchufe: {form.estado_enchufe.data}")
+        print(f"Estado de Cebador: {form.estado_cebador.data}")
+        print(f"Estado de Mangueras: {form.estado_mangueras.data}")
+        print(f"Estado de Alarmas: {form.estado_alarmas.data}")
+        print(f"Estado de Extintor: {form.estado_extintor.data}")
+        print(f"Estado de Puertas: {form.estado_puertas.data}")
+        print(f"Estado de Baterías: {form.estado_baterias.data}")
+        print(f"Estado de Ventilador: {form.estado_ventilador.data}")
+        print(f"Observaciones Breaker: {form.observaciones_breaker.data}")
         print("=" * 50)
 
-                # Procesar fotos
+        # Procesar fotos Grupo Electrógeno y Estanque de Combustible
         fotos_guardadas = []
         for i in range(1, 4):
             campo_foto = f'foto_{i}'
@@ -688,6 +703,17 @@ def inspeccion_ge():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_guardadas.append(filename)
+        # Procesar fotos breaker
+        fotos_breaker = []
+        for i in range(1, 4):
+            campo_foto = f'foto_breaker_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_ge_breaker_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_breaker.append(filename)
         
         mensaje = "Inspección GE Auxiliar guardada correctamente"
         return render_template('formularios/inspeccion_ge.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
