@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import check_password_hash
 from forms_cow import InspeccionCOWForm
+from forms_ge import InspeccionGEForm
 from werkzeug.utils import secure_filename
 import os
 from reportlab.lib.pagesizes import letter
@@ -627,11 +628,58 @@ def inspeccion_cow():
     fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
     return render_template('formularios/inspeccion_cow.html', form=form, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
 
-@app.route('/inspeccion_ge')
+@app.route('/inspeccion_ge', methods=['GET', 'POST'])
 def inspeccion_ge():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('inspeccion_ge.html', usuario=session['nombre'], rol=session['rol'])
+    
+    form = InspeccionGEForm()
+    
+    # Inicializar variables
+    fecha_actual = None
+    fecha_iso = None
+    dia_turno = None
+    turno = None
+    estado_turno = None
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        fecha_seleccionada = request.form.get('fecha')
+        if fecha_seleccionada:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno(fecha_seleccionada)
+        else:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+        
+        print("=" * 50)
+        print("NUEVA INSPECCIÓN GE AUXILIAR")
+        print("=" * 50)
+        print(f"Fecha: {fecha_actual} - {estado_turno}")
+        print(f"Responsable: {form.responsable.data}")
+        print(f"Nombre GE: {form.nombre_ge.data}")
+        print(f"Tipo GE: {form.tipo_ge.data}")
+        print(f"Horómetro: {form.horometro.data}")
+        print(f"Hora Inicio: {form.hora_inicio.data}")
+        print(f"Hora Término: {form.hora_termino.data}")
+        print(f"Potencia Continua: {form.potencia_continua.data}")
+        print("=" * 50)
+
+                # Procesar fotos
+        fotos_guardadas = []
+        for i in range(1, 4):
+            campo_foto = f'foto_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_ge_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_guardadas.append(filename)
+        
+        mensaje = "Inspección GE Auxiliar guardada correctamente"
+        return render_template('formularios/inspeccion_ge.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
+    
+    # GET request
+    fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+    return render_template('formularios/inspeccion_ge.html', form=form, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
 
 @app.route('/desplazamiento')
 def desplazamiento():
