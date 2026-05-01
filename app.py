@@ -690,6 +690,17 @@ def inspeccion_ge():
         print(f"Estado de Baterías: {form.estado_baterias.data}")
         print(f"Estado de Ventilador: {form.estado_ventilador.data}")
         print(f"Observaciones Breaker: {form.observaciones_breaker.data}")
+        print(f"Limpieza General: {form.limpieza_general.data}")
+        print(f"Estado de Chasis: {form.estado_chasis.data}")
+        print(f"Cantidad de Cuñas: {form.cantidad_cunas.data}")
+        print(f"Checkpoints: {form.checkpoints.data}")
+        print(f"Presión de Neumáticos: {form.presion_neumaticos.data}")
+        print(f"Estado de Jaula: {form.estado_jaula.data}")
+        print(f"Estado de Candados: {form.estado_candados.data}")
+        print(f"Nivelación de Carro: {form.nivelacion_carro.data}")
+        print(f"Patas de Posicionamiento: {form.patas_posicionamiento.data}")
+        print(f"Manivelas Izajes: {form.manivelas_izajes.data}")
+        print(f"Observaciones Estructuras: {form.observaciones_estructuras.data}")
         print("=" * 50)
 
         # Procesar fotos Grupo Electrógeno y Estanque de Combustible
@@ -714,6 +725,17 @@ def inspeccion_ge():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_breaker.append(filename)
+        # Procesar fotos estructuras
+        fotos_estructuras = []
+        for i in range(1, 4):
+            campo_foto = f'foto_estructura_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_ge_estructura_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_estructuras.append(filename)
         
         mensaje = "Inspección GE Auxiliar guardada correctamente"
         return render_template('formularios/inspeccion_ge.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)

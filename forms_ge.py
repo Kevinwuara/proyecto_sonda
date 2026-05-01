@@ -74,5 +74,23 @@ class InspeccionGEForm(FlaskForm):
     foto_breaker_1 = StringField('Fotografía Breaker 1', validators=[Optional()])
     foto_breaker_2 = StringField('Fotografía Breaker 2', validators=[Optional()])
     foto_breaker_3 = StringField('Fotografía Breaker 3', validators=[Optional()])
+
+        # ==================== ESTRUCTURAS, CHASIS Y OTROS ====================
+    limpieza_general = SelectField('Limpieza General', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    estado_chasis = SelectField('Estado de Chasis', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    cantidad_cunas = SelectField('Cantidad de Cuñas', choices=[(str(i), str(i)) for i in range(1, 11)], validators=[DataRequired()])
+    checkpoints = SelectField('Checkpoints', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    presion_neumaticos = SelectField('Presión de Neumáticos', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    estado_jaula = SelectField('Estado de Jaula', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    estado_candados = SelectField('Estado de Candados', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    nivelacion_carro = SelectField('Nivelación de Carro', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    patas_posicionamiento = SelectField('Patas de Posicionamiento', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    manivelas_izajes = SelectField('Manivelas Izajes de Pata', choices=[('OK', 'OK'), ('NOK', 'NOK')], validators=[DataRequired()])
+    
+    observaciones_estructuras = TextAreaField('Observaciones Estructuras', validators=[Optional()])
+        # ==================== FOTOGRAFÍAS ESTRUCTURAS (3 para GE Auxiliar) ====================
+    foto_estructura_1 = StringField('Foto Estructura 1', validators=[Optional()])
+    foto_estructura_2 = StringField('Foto Estructura 2', validators=[Optional()])
+    foto_estructura_3 = StringField('Foto Estructura 3', validators=[Optional()])
     
     submit = SubmitField('Guardar Inspección')

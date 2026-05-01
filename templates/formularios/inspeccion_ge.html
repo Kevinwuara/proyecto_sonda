@@ -287,6 +287,89 @@
                     </div>
                 </div>
             </fieldset>
+                        <!-- Estructuras, Chasis y Otros -->
+            <fieldset>
+                <legend>🏗️ Estructuras, Chasis y Otros</legend>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.limpieza_general.label }}
+                        {{ form.limpieza_general(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_chasis.label }}
+                        {{ form.estado_chasis(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.cantidad_cunas.label }}
+                        {{ form.cantidad_cunas(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.checkpoints.label }}
+                        {{ form.checkpoints(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.presion_neumaticos.label }}
+                        {{ form.presion_neumaticos(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.estado_jaula.label }}
+                        {{ form.estado_jaula(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.estado_candados.label }}
+                        {{ form.estado_candados(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.nivelacion_carro.label }}
+                        {{ form.nivelacion_carro(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.patas_posicionamiento.label }}
+                        {{ form.patas_posicionamiento(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.manivelas_izajes.label }}
+                        {{ form.manivelas_izajes(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.observaciones_estructuras.label }}
+                    {{ form.observaciones_estructuras(class="form-control", rows="3") }}
+                </div>
+
+                <!-- Sección de Fotografías Estructuras -->
+                <div class="form-group">
+                    <label>📸 Fotografías de respaldo (máximo 3)</label>
+                    <div class="fotos-row">
+                        <div class="foto-item">
+                            <label>Foto Estructura 1</label>
+                            <input type="file" name="foto_estructura_1" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto Estructura 2</label>
+                            <input type="file" name="foto_estructura_2" accept="image/*" class="form-control">
+                        </div>
+                        <div class="foto-item">
+                            <label>Foto Estructura 3</label>
+                            <input type="file" name="foto_estructura_3" accept="image/*" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn-submit") }}
             </div>
