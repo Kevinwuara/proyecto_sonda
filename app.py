@@ -736,6 +736,21 @@ def inspeccion_ge():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_estructuras.append(filename)
+        # Procesar fotos levantamiento (8 puntos)
+        fotos_levantamiento = []
+        for i in range(1, 9):
+            campo_foto = f'foto_lev_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_ge_lev_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_levantamiento.append(filename)
+                else:
+                    fotos_levantamiento.append(None)
+            else:
+                fotos_levantamiento.append(None)
         
         mensaje = "Inspección GE Auxiliar guardada correctamente"
         return render_template('formularios/inspeccion_ge.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)

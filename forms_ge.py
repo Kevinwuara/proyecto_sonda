@@ -92,5 +92,15 @@ class InspeccionGEForm(FlaskForm):
     foto_estructura_1 = StringField('Foto Estructura 1', validators=[Optional()])
     foto_estructura_2 = StringField('Foto Estructura 2', validators=[Optional()])
     foto_estructura_3 = StringField('Foto Estructura 3', validators=[Optional()])
+
+        # ==================== LEVANTAMIENTO DE FOTOGRAFÍAS (8 puntos) ====================
+    foto_lev_1 = StringField('Foto Lev 1', validators=[Optional()])
+    foto_lev_2 = StringField('Foto Lev 2', validators=[Optional()])
+    foto_lev_3 = StringField('Foto Lev 3', validators=[Optional()])
+    foto_lev_4 = StringField('Foto Lev 4', validators=[Optional()])
+    foto_lev_5 = StringField('Foto Lev 5', validators=[Optional()])
+    foto_lev_6 = StringField('Foto Lev 6', validators=[Optional()])
+    foto_lev_7 = StringField('Foto Lev 7', validators=[Optional()])
+    foto_lev_8 = StringField('Foto Lev 8', validators=[Optional()])
     
     submit = SubmitField('Guardar Inspección')
