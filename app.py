@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, session, send_file, jsonify
+from wtforms import form
 from forms import LoginForm
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -253,6 +254,100 @@ def calcular_fecha_turno(fecha_ingresada=None):
         estado = f"Turno B 7x7: Día {dia_turno} de trabajo"
 
     return fecha_str, fecha_iso, dia_turno, turno, estado
+
+    # Modelo de Inspección GE Auxiliar
+class InspeccionGE(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    sitio_id = db.Column(db.Integer, db.ForeignKey('sitio.id'), nullable=True)
+    fecha = db.Column(db.String(20), nullable=False)
+    dia_turno = db.Column(db.Integer, nullable=False)
+    
+    # Datos Generales
+    responsable = db.Column(db.String(50), nullable=False)
+    nombre_ge = db.Column(db.String(50), nullable=False)
+    tipo_ge = db.Column(db.String(50), nullable=False)
+    horometro = db.Column(db.Integer, nullable=False)
+    hora_inicio = db.Column(db.String(10), nullable=False)
+    hora_termino = db.Column(db.String(10), nullable=False)
+    potencia_continua = db.Column(db.Integer, nullable=True)
+    
+    # Grupo Electrógeno y Estanque
+    cantidad_arranques = db.Column(db.Integer, nullable=False)
+    horas_funcionamiento = db.Column(db.Integer, nullable=False)
+    nivel_aceite = db.Column(db.String(10), nullable=False)
+    nivel_combustible = db.Column(db.String(10), nullable=False)
+    nivel_refrigerante = db.Column(db.String(10), nullable=False)
+    proxima_mantencion = db.Column(db.Integer, nullable=False)
+    estado_carcasa = db.Column(db.String(5), nullable=False)
+    limpieza_ge_interior = db.Column(db.String(5), nullable=False)
+    limpieza_radiador = db.Column(db.String(5), nullable=False)
+    visor_combustible = db.Column(db.String(5), nullable=False)
+    arranque_automatico = db.Column(db.String(5), nullable=False)
+    limpieza_interior = db.Column(db.String(5), nullable=False)
+    limpieza_exterior = db.Column(db.String(5), nullable=False)
+    cable_5p_4p = db.Column(db.String(5), nullable=False)
+    observaciones = db.Column(db.Text, nullable=True)
+    
+    # Estado Breaker y Baterías
+    estado_pantalla = db.Column(db.String(5), nullable=False)
+    estado_parada_emergencia = db.Column(db.String(5), nullable=False)
+    estado_corta_corriente = db.Column(db.String(5), nullable=False)
+    estado_selector = db.Column(db.String(5), nullable=False)
+    estado_bornes_bateria = db.Column(db.String(5), nullable=False)
+    estado_ramal_cables = db.Column(db.String(5), nullable=False)
+    estado_enchufe = db.Column(db.String(5), nullable=False)
+    estado_cebador = db.Column(db.String(5), nullable=False)
+    estado_mangueras = db.Column(db.String(5), nullable=False)
+    estado_alarmas = db.Column(db.String(5), nullable=False)
+    estado_extintor = db.Column(db.String(5), nullable=False)
+    estado_puertas = db.Column(db.String(5), nullable=False)
+    estado_baterias = db.Column(db.String(5), nullable=False)
+    estado_ventilador = db.Column(db.String(5), nullable=False)
+    observaciones_breaker = db.Column(db.Text, nullable=True)
+    
+    # Estructuras, Chasis y Otros
+    limpieza_general = db.Column(db.String(5), nullable=False)
+    estado_chasis = db.Column(db.String(5), nullable=False)
+    cantidad_cunas = db.Column(db.String(10), nullable=False)
+    checkpoints = db.Column(db.String(5), nullable=False)
+    presion_neumaticos = db.Column(db.String(5), nullable=False)
+    estado_jaula = db.Column(db.String(5), nullable=False)
+    estado_candados = db.Column(db.String(5), nullable=False)
+    nivelacion_carro = db.Column(db.String(5), nullable=False)
+    patas_posicionamiento = db.Column(db.String(5), nullable=False)
+    manivelas_izajes = db.Column(db.String(5), nullable=False)
+    observaciones_estructuras = db.Column(db.Text, nullable=True)
+    
+    # Fotografías (rutas)
+    foto_1 = db.Column(db.String(200), nullable=True)
+    foto_2 = db.Column(db.String(200), nullable=True)
+    foto_3 = db.Column(db.String(200), nullable=True)
+    foto_breaker_1 = db.Column(db.String(200), nullable=True)
+    foto_breaker_2 = db.Column(db.String(200), nullable=True)
+    foto_breaker_3 = db.Column(db.String(200), nullable=True)
+    foto_estructura_1 = db.Column(db.String(200), nullable=True)
+    foto_estructura_2 = db.Column(db.String(200), nullable=True)
+    foto_estructura_3 = db.Column(db.String(200), nullable=True)
+    foto_lev_1 = db.Column(db.String(200), nullable=True)
+    foto_lev_2 = db.Column(db.String(200), nullable=True)
+    foto_lev_3 = db.Column(db.String(200), nullable=True)
+    foto_lev_4 = db.Column(db.String(200), nullable=True)
+    foto_lev_5 = db.Column(db.String(200), nullable=True)
+    foto_lev_6 = db.Column(db.String(200), nullable=True)
+    foto_lev_7 = db.Column(db.String(200), nullable=True)
+    foto_lev_8 = db.Column(db.String(200), nullable=True)
+    
+    # Estado y control
+    estado = db.Column(db.String(20), default='pendiente')
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    usuario = db.relationship('Usuario', backref='inspecciones_ge')
+    sitio = db.relationship('Sitio', backref='inspecciones_ge')
+    
+    def __repr__(self):
+        return f'<InspeccionGE {self.id} - {self.nombre_ge}>'
 
 @app.route('/calcular_turno', methods=['POST'])
 def calcular_turno():
@@ -635,13 +730,6 @@ def inspeccion_ge():
     
     form = InspeccionGEForm()
     
-    # Inicializar variables
-    fecha_actual = None
-    fecha_iso = None
-    dia_turno = None
-    turno = None
-    estado_turno = None
-    
     if request.method == 'POST' and form.validate_on_submit():
         fecha_seleccionada = request.form.get('fecha')
         if fecha_seleccionada:
@@ -649,61 +737,7 @@ def inspeccion_ge():
         else:
             fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
         
-        print("=" * 50)
-        print("NUEVA INSPECCIÓN GE AUXILIAR")
-        print("=" * 50)
-        print(f"Fecha: {fecha_actual} - {estado_turno}")
-        print(f"Responsable: {form.responsable.data}")
-        print(f"Nombre GE: {form.nombre_ge.data}")
-        print(f"Tipo GE: {form.tipo_ge.data}")
-        print(f"Horómetro: {form.horometro.data}")
-        print(f"Hora Inicio: {form.hora_inicio.data}")
-        print(f"Hora Término: {form.hora_termino.data}")
-        print(f"Potencia Continua: {form.potencia_continua.data}")
-        print(f"Cantidad de Arranques: {form.cantidad_arranques.data}")
-        print(f"Horas de Funcionamiento: {form.horas_funcionamiento.data}")
-        print(f"Nivel de Aceite: {form.nivel_aceite.data}")
-        print(f"Nivel de Combustible: {form.nivel_combustible.data}")
-        print(f"Nivel de Refrigerante: {form.nivel_refrigerante.data}")
-        print(f"Próxima Mantención: {form.proxima_mantencion.data}")
-        print(f"Estado de Carcasa: {form.estado_carcasa.data}")
-        print(f"Limpieza GE Interior: {form.limpieza_ge_interior.data}")
-        print(f"Limpieza Radiador: {form.limpieza_radiador.data}")
-        print(f"Visor de Combustible: {form.visor_combustible.data}")
-        print(f"Arranque Automático: {form.arranque_automatico.data}")
-        print(f"Limpieza Interior: {form.limpieza_interior.data}")
-        print(f"Limpieza Exterior: {form.limpieza_exterior.data}")
-        print(f"Cable 5p/4p: {form.cable_5p_4p.data}")
-        print(f"Observaciones: {form.observaciones.data}")
-        print(f"Estado de Pantalla: {form.estado_pantalla.data}")
-        print(f"Estado de Parada Emergencia: {form.estado_parada_emergencia.data}")
-        print(f"Estado de Corta Corriente: {form.estado_corta_corriente.data}")
-        print(f"Estado de Selector: {form.estado_selector.data}")
-        print(f"Estado de Bornes de Batería: {form.estado_bornes_bateria.data}")
-        print(f"Estado de Ramal de Cables: {form.estado_ramal_cables.data}")
-        print(f"Estado de Enchufe: {form.estado_enchufe.data}")
-        print(f"Estado de Cebador: {form.estado_cebador.data}")
-        print(f"Estado de Mangueras: {form.estado_mangueras.data}")
-        print(f"Estado de Alarmas: {form.estado_alarmas.data}")
-        print(f"Estado de Extintor: {form.estado_extintor.data}")
-        print(f"Estado de Puertas: {form.estado_puertas.data}")
-        print(f"Estado de Baterías: {form.estado_baterias.data}")
-        print(f"Estado de Ventilador: {form.estado_ventilador.data}")
-        print(f"Observaciones Breaker: {form.observaciones_breaker.data}")
-        print(f"Limpieza General: {form.limpieza_general.data}")
-        print(f"Estado de Chasis: {form.estado_chasis.data}")
-        print(f"Cantidad de Cuñas: {form.cantidad_cunas.data}")
-        print(f"Checkpoints: {form.checkpoints.data}")
-        print(f"Presión de Neumáticos: {form.presion_neumaticos.data}")
-        print(f"Estado de Jaula: {form.estado_jaula.data}")
-        print(f"Estado de Candados: {form.estado_candados.data}")
-        print(f"Nivelación de Carro: {form.nivelacion_carro.data}")
-        print(f"Patas de Posicionamiento: {form.patas_posicionamiento.data}")
-        print(f"Manivelas Izajes: {form.manivelas_izajes.data}")
-        print(f"Observaciones Estructuras: {form.observaciones_estructuras.data}")
-        print("=" * 50)
-
-        # Procesar fotos Grupo Electrógeno y Estanque de Combustible
+        # Procesar fotos (tu código existente aquí...)
         fotos_guardadas = []
         for i in range(1, 4):
             campo_foto = f'foto_{i}'
@@ -714,6 +748,11 @@ def inspeccion_ge():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_guardadas.append(filename)
+                else:
+                    fotos_guardadas.append(None)
+            else:
+                fotos_guardadas.append(None)
+        
         # Procesar fotos breaker
         fotos_breaker = []
         for i in range(1, 4):
@@ -725,6 +764,11 @@ def inspeccion_ge():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_breaker.append(filename)
+                else:
+                    fotos_breaker.append(None)
+            else:
+                fotos_breaker.append(None)
+        
         # Procesar fotos estructuras
         fotos_estructuras = []
         for i in range(1, 4):
@@ -736,6 +780,11 @@ def inspeccion_ge():
                     filepath = os.path.join('static/uploads', filename)
                     file.save(filepath)
                     fotos_estructuras.append(filename)
+                else:
+                    fotos_estructuras.append(None)
+            else:
+                fotos_estructuras.append(None)
+        
         # Procesar fotos levantamiento (8 puntos)
         fotos_levantamiento = []
         for i in range(1, 9):
@@ -752,10 +801,90 @@ def inspeccion_ge():
             else:
                 fotos_levantamiento.append(None)
         
-        mensaje = "Inspección GE Auxiliar guardada correctamente"
+        # Guardar en base de datos
+        usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+        
+        nueva_inspeccion_ge = InspeccionGE(
+            usuario_id=usuario_actual.id,
+            sitio_id=None,
+            fecha=fecha_actual,
+            dia_turno=dia_turno,
+            responsable=form.responsable.data,
+            nombre_ge=form.nombre_ge.data,
+            tipo_ge=form.tipo_ge.data,
+            horometro=form.horometro.data,
+            hora_inicio=form.hora_inicio.data,
+            hora_termino=form.hora_termino.data,
+            potencia_continua=form.potencia_continua.data,
+            cantidad_arranques=form.cantidad_arranques.data,
+            horas_funcionamiento=form.horas_funcionamiento.data,
+            nivel_aceite=form.nivel_aceite.data,
+            nivel_combustible=form.nivel_combustible.data,
+            nivel_refrigerante=form.nivel_refrigerante.data,
+            proxima_mantencion=form.proxima_mantencion.data,
+            estado_carcasa=form.estado_carcasa.data,
+            limpieza_ge_interior=form.limpieza_ge_interior.data,
+            limpieza_radiador=form.limpieza_radiador.data,
+            visor_combustible=form.visor_combustible.data,
+            arranque_automatico=form.arranque_automatico.data,
+            limpieza_interior=form.limpieza_interior.data,
+            limpieza_exterior=form.limpieza_exterior.data,
+            cable_5p_4p=form.cable_5p_4p.data,
+            observaciones=form.observaciones.data,
+            estado_pantalla=form.estado_pantalla.data,
+            estado_parada_emergencia=form.estado_parada_emergencia.data,
+            estado_corta_corriente=form.estado_corta_corriente.data,
+            estado_selector=form.estado_selector.data,
+            estado_bornes_bateria=form.estado_bornes_bateria.data,
+            estado_ramal_cables=form.estado_ramal_cables.data,
+            estado_enchufe=form.estado_enchufe.data,
+            estado_cebador=form.estado_cebador.data,
+            estado_mangueras=form.estado_mangueras.data,
+            estado_alarmas=form.estado_alarmas.data,
+            estado_extintor=form.estado_extintor.data,
+            estado_puertas=form.estado_puertas.data,
+            estado_baterias=form.estado_baterias.data,
+            estado_ventilador=form.estado_ventilador.data,
+            observaciones_breaker=form.observaciones_breaker.data,
+            limpieza_general=form.limpieza_general.data,
+            estado_chasis=form.estado_chasis.data,
+            cantidad_cunas=form.cantidad_cunas.data,
+            checkpoints=form.checkpoints.data,
+            presion_neumaticos=form.presion_neumaticos.data,
+            estado_jaula=form.estado_jaula.data,
+            estado_candados=form.estado_candados.data,
+            nivelacion_carro=form.nivelacion_carro.data,
+            patas_posicionamiento=form.patas_posicionamiento.data,
+            manivelas_izajes=form.manivelas_izajes.data,
+            observaciones_estructuras=form.observaciones_estructuras.data,
+            foto_1=fotos_guardadas[0] if len(fotos_guardadas) > 0 else None,
+            foto_2=fotos_guardadas[1] if len(fotos_guardadas) > 1 else None,
+            foto_3=fotos_guardadas[2] if len(fotos_guardadas) > 2 else None,
+            foto_breaker_1=fotos_breaker[0] if len(fotos_breaker) > 0 else None,
+            foto_breaker_2=fotos_breaker[1] if len(fotos_breaker) > 1 else None,
+            foto_breaker_3=fotos_breaker[2] if len(fotos_breaker) > 2 else None,
+            foto_estructura_1=fotos_estructuras[0] if len(fotos_estructuras) > 0 else None,
+            foto_estructura_2=fotos_estructuras[1] if len(fotos_estructuras) > 1 else None,
+            foto_estructura_3=fotos_estructuras[2] if len(fotos_estructuras) > 2 else None,
+            foto_lev_1=fotos_levantamiento[0] if len(fotos_levantamiento) > 0 else None,
+            foto_lev_2=fotos_levantamiento[1] if len(fotos_levantamiento) > 1 else None,
+            foto_lev_3=fotos_levantamiento[2] if len(fotos_levantamiento) > 2 else None,
+            foto_lev_4=fotos_levantamiento[3] if len(fotos_levantamiento) > 3 else None,
+            foto_lev_5=fotos_levantamiento[4] if len(fotos_levantamiento) > 4 else None,
+            foto_lev_6=fotos_levantamiento[5] if len(fotos_levantamiento) > 5 else None,
+            foto_lev_7=fotos_levantamiento[6] if len(fotos_levantamiento) > 6 else None,
+            foto_lev_8=fotos_levantamiento[7] if len(fotos_levantamiento) > 7 else None,
+            estado='pendiente'
+        )
+        
+        db.session.add(nueva_inspeccion_ge)
+        db.session.commit()
+        
+        mensaje = f"Inspección GE Auxiliar guardada correctamente (ID: {nueva_inspeccion_ge.id})"
         return render_template('formularios/inspeccion_ge.html', form=form, mensaje=mensaje, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
     
-    # GET request
+    # ==================== ESTO ES LO QUE FALTABA ====================
+    # GET request o formulario inválido
     fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
     return render_template('formularios/inspeccion_ge.html', form=form, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
 
