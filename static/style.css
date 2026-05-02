@@ -706,3 +706,20 @@ small {
 .btn-pdf:hover {
     background-color: #322b57;
 }
+
+.tipo {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.tipo.cow {
+    background-color: #0033a0;
+    color: white;
+}
+
+.tipo.ge {
+    background-color: #28a745;
+    color: white;
+}

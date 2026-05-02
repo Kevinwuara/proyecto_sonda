@@ -18,8 +18,9 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Tipo</th>
                         <th>Fecha</th>
-                        <th>Sitio</th>
+                        <th>Sitio / GE</th>
                         <th>Responsable</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -29,8 +30,13 @@
                     {% for ins in inspecciones %}
                     <tr>
                         <td>{{ ins.id }}</td>
+                        <td>
+                            <span class="tipo {{ ins.tipo }}">
+                                {{ ins.tipo|upper }}
+                            </span>
+                        </td>
                         <td>{{ ins.fecha }} (Día {{ ins.dia_turno }})</td>
-                        <td>{{ ins.sitio_ref.nombre_sitio[:50] if ins.sitio_ref else 'N/A' }}...</td>
+                        <td>{{ ins.sitio[:50] if ins.sitio else 'N/A' }}...</td>
                         <td>{{ ins.responsable }}</td>
                         <td>
                             <span class="estado {{ ins.estado }}">
@@ -38,16 +44,16 @@
                             </span>
                         </td>
                         <td>
-            <a href="{{ url_for('ver_informe', id=ins.id) }}" class="btn-ver">👁️</a>
-            <a href="{{ url_for('editar_informe', id=ins.id) }}" class="btn-editar">✏️</a>
-            <a href="{{ url_for('borrar_informe', id=ins.id) }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">🗑️</a>
-            {% if ins.estado == 'aprobado' %}
-            <a href="{{ url_for('generar_pdf', id=ins.id) }}" class="btn-pdf" target="_blank">📄</a>
-            {% endif %}
-            {% if rol == 'supervisor' and ins.estado == 'pendiente' %}
-            <a href="{{ url_for('aprobar_informe', id=ins.id) }}" class="btn-aprobar">✅</a>
-            <a href="{{ url_for('rechazar_informe', id=ins.id) }}" class="btn-rechazar">❌</a>
-            {% endif %}
+                        <a href="{{ url_for('ver_informe', id=ins.id, tipo=ins.tipo) }}" class="btn-ver">👁️</a>
+                        <a href="{{ url_for('editar_informe', id=ins.id, tipo=ins.tipo) }}" class="btn-editar">✏️</a>
+                        <a href="{{ url_for('borrar_informe', id=ins.id, tipo=ins.tipo) }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">🗑️</a>
+                        {% if ins.estado == 'aprobado' %}
+                        <a href="{{ url_for('generar_pdf', id=ins.id, tipo=ins.tipo) }}" class="btn-pdf" target="_blank">📄</a>
+                        {% endif %}
+                        {% if rol == 'supervisor' and ins.estado == 'pendiente' %}
+                        <a href="{{ url_for('aprobar_informe', id=ins.id, tipo=ins.tipo) }}" class="btn-aprobar">✅</a>
+                        <a href="{{ url_for('rechazar_informe', id=ins.id, tipo=ins.tipo) }}" class="btn-rechazar">❌</a>
+                        {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
