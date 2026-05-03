@@ -2211,60 +2211,77 @@ def generar_pdf(id, tipo=None):
         elementos.append(tabla_principales)
         elementos.append(Spacer(1, 0.2*inch))
         
-        # ==================== GRUPO ELECTRÓGENO Y ESTANQUE ====================
+                # ==================== GRUPO ELECTRÓGENO Y ESTANQUE ====================
         titulo_ge = Paragraph("Grupo Electrógeno y Estanque de Combustible", 
                               ParagraphStyle('TituloGEStyle', parent=normal_style,
                                             alignment=TA_CENTER, fontSize=12,
                                             textColor=colors.HexColor("#000000"),
                                             fontName='Helvetica-Bold'))
         
+        # Tabla con 5 columnas: [Campo1, Valor1, Campo2, OK, NOK]
+        # Los valores OK y NOK se muestran como X en las columnas correspondientes
         datos_ge = [
-            [titulo_ge, "", "", ""],
+            # Fila 0: Título (combinado en 5 columnas)
+            [titulo_ge, "", "", "", ""],
+            # Fila 1: Encabezados OK y NOK
             [Paragraph("", cell_style), Paragraph("", cell_style), Paragraph("", cell_style), 
              Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style)],
+            # Fila 2
             [Paragraph("<b>Horas de Funcionamiento</b>", cell_style), 
              Paragraph(str(inspeccion.horas_funcionamiento or '-'), cell_style),
              Paragraph("<b>Limpieza GE Interior</b>", cell_style),
              Paragraph("X" if inspeccion.limpieza_ge_interior == 'OK' else "", cell_style),
              Paragraph("X" if inspeccion.limpieza_ge_interior == 'NOK' else "", cell_style)],
+            # Fila 3
             [Paragraph("<b>Cantidad de Arranques</b>", cell_style), 
              Paragraph(str(inspeccion.cantidad_arranques or '-'), cell_style),
              Paragraph("<b>Limpieza Radiador</b>", cell_style),
              Paragraph("X" if inspeccion.limpieza_radiador == 'OK' else "", cell_style),
              Paragraph("X" if inspeccion.limpieza_radiador == 'NOK' else "", cell_style)],
+            # Fila 4
             [Paragraph("<b>Nivel de Aceite</b>", cell_style), 
              Paragraph(inspeccion.nivel_aceite or '-', cell_style),
              Paragraph("<b>Visor de Combustible</b>", cell_style),
              Paragraph("X" if inspeccion.visor_combustible == 'OK' else "", cell_style),
              Paragraph("X" if inspeccion.visor_combustible == 'NOK' else "", cell_style)],
+            # Fila 5
             [Paragraph("<b>Nivel de Combustible</b>", cell_style), 
              Paragraph(inspeccion.nivel_combustible or '-', cell_style),
              Paragraph("<b>Arranque Automático</b>", cell_style),
              Paragraph("X" if inspeccion.arranque_automatico == 'OK' else "", cell_style),
              Paragraph("X" if inspeccion.arranque_automatico == 'NOK' else "", cell_style)],
+            # Fila 6
             [Paragraph("<b>Nivel de Refrigerante</b>", cell_style), 
              Paragraph(inspeccion.nivel_refrigerante or '-', cell_style),
              Paragraph("<b>Limpieza Interior</b>", cell_style),
              Paragraph("X" if inspeccion.limpieza_interior == 'OK' else "", cell_style),
              Paragraph("X" if inspeccion.limpieza_interior == 'NOK' else "", cell_style)],
+            # Fila 7
             [Paragraph("<b>Próxima Mantención</b>", cell_style), 
              Paragraph(str(inspeccion.proxima_mantencion or '-'), cell_style),
              Paragraph("<b>Limpieza Exterior</b>", cell_style),
              Paragraph("X" if inspeccion.limpieza_exterior == 'OK' else "", cell_style),
              Paragraph("X" if inspeccion.limpieza_exterior == 'NOK' else "", cell_style)],
-            [Paragraph("<b>Estado de Carcasa</b>", cell_style), 
-             Paragraph("X" if inspeccion.estado_carcasa == 'OK' else "X" if inspeccion.estado_carcasa == 'NOK' else "", cell_style),
-             Paragraph("<b>Cable 5p/4p</b>", cell_style),
-             Paragraph(f"{inspeccion.cable_5p_4p or '-'}", cell_style),
-             "", ""],
+            # Fila 8: Estado de Carcasa va en campo2 (columna 3), Cable 5p/4p va en valor de Estado de Carcasa
+            [Paragraph("<b>Cable 5p/4p</b>", cell_style), 
+             Paragraph(inspeccion.cable_5p_4p or '-', cell_style),
+             Paragraph("<b>Estado de Carcasa</b>", cell_style),
+             Paragraph("X" if inspeccion.estado_carcasa == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.estado_carcasa == 'NOK' else "", cell_style)],
         ]
         
-        tabla_ge = Table(datos_ge, colWidths=[2.8*inch, 0.9*inch, 2.3*inch, 0.5*inch, 0.5*inch])
+        # Crear tabla con 4 columnas (ancho total 7.0 inches)
+        tabla_ge = Table(datos_ge, colWidths=[2.2*inch, 1.0*inch, 2.2*inch, 0.8*inch, 0.8*inch])
         tabla_ge.setStyle(TableStyle([
+            # Título combinado en la primera fila (4 columnas)
             ('SPAN', (0,0), (4,0)),
+            # Combinar las 3 primeras columnas en la fila 1
             ('SPAN', (0,1), (2,1)),
             ('ALIGN', (0,0), (-1,0), 'CENTER'),
             ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
+            # Encabezado OK/NOK centrado
+            ('ALIGN', (3,1), (3,1), 'CENTER'),
+            # Estilos generales
             ('ALIGN', (0,2), (-1,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
@@ -2272,6 +2289,7 @@ def generar_pdf(id, tipo=None):
             ('GRID', (0,0), (-1,-1), 1, colors.black),
             ('TOPPADDING', (0,0), (-1,-1), 6),
             ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            # Alinear texto de la primera columna a la izquierda
             ('ALIGN', (0,2), (0,-1), 'LEFT'),
             ('ALIGN', (2,2), (2,-1), 'LEFT'),
         ]))
@@ -2318,60 +2336,67 @@ def generar_pdf(id, tipo=None):
         elementos.append(tabla_obs_fotos)
         elementos.append(Spacer(1, 0.2*inch))
         
-        # ==================== ESTADO BREAKER Y BATERÍAS ====================
+                # ==================== ESTADO BREAKER Y BATERÍAS ====================
         titulo_breaker = Paragraph("Estado Breaker y Baterías", 
                                    ParagraphStyle('TituloBreakerStyle', parent=normal_style,
                                                  alignment=TA_CENTER, fontSize=12,
                                                  textColor=colors.HexColor("#000000"),
                                                  fontName='Helvetica-Bold'))
         
+        # Tabla con 4 columnas como la anterior
         datos_breaker = [
-            [titulo_breaker, "", ""],
-            [Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style)],
+            [titulo_breaker, "", "", ""],
+            [Paragraph("<b>Ítem</b>", cell_style), Paragraph("", cell_style), 
+             Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style)],
             [Paragraph("Estado de Pantalla", cell_style),
-             "X" if inspeccion.estado_pantalla == 'OK' else "", "X" if inspeccion.estado_pantalla == 'NOK' else ""],
-            [Paragraph("Estado de Parada Emergencia", cell_style),
-             "X" if inspeccion.estado_parada_emergencia == 'OK' else "", "X" if inspeccion.estado_parada_emergencia == 'NOK' else ""],
+             "X" if inspeccion.estado_pantalla == 'OK' else "X" if inspeccion.estado_pantalla == 'NOK' else "",
+             Paragraph("Estado de Parada Emergencia", cell_style),
+             "X" if inspeccion.estado_parada_emergencia == 'OK' else "X" if inspeccion.estado_parada_emergencia == 'NOK' else ""],
             [Paragraph("Estado de Corta Corriente", cell_style),
-             "X" if inspeccion.estado_corta_corriente == 'OK' else "", "X" if inspeccion.estado_corta_corriente == 'NOK' else ""],
-            [Paragraph("Estado de Selector", cell_style),
-             "X" if inspeccion.estado_selector == 'OK' else "", "X" if inspeccion.estado_selector == 'NOK' else ""],
+             "X" if inspeccion.estado_corta_corriente == 'OK' else "X" if inspeccion.estado_corta_corriente == 'NOK' else "",
+             Paragraph("Estado de Selector", cell_style),
+             "X" if inspeccion.estado_selector == 'OK' else "X" if inspeccion.estado_selector == 'NOK' else ""],
             [Paragraph("Estado de Bornes de Batería", cell_style),
-             "X" if inspeccion.estado_bornes_bateria == 'OK' else "", "X" if inspeccion.estado_bornes_bateria == 'NOK' else ""],
-            [Paragraph("Estado de Ramal de Cables", cell_style),
-             "X" if inspeccion.estado_ramal_cables == 'OK' else "", "X" if inspeccion.estado_ramal_cables == 'NOK' else ""],
+             "X" if inspeccion.estado_bornes_bateria == 'OK' else "X" if inspeccion.estado_bornes_bateria == 'NOK' else "",
+             Paragraph("Estado de Ramal de Cables", cell_style),
+             "X" if inspeccion.estado_ramal_cables == 'OK' else "X" if inspeccion.estado_ramal_cables == 'NOK' else ""],
             [Paragraph("Estado de Enchufe", cell_style),
-             "X" if inspeccion.estado_enchufe == 'OK' else "", "X" if inspeccion.estado_enchufe == 'NOK' else ""],
-            [Paragraph("Estado de Cebador", cell_style),
-             "X" if inspeccion.estado_cebador == 'OK' else "", "X" if inspeccion.estado_cebador == 'NOK' else ""],
+             "X" if inspeccion.estado_enchufe == 'OK' else "X" if inspeccion.estado_enchufe == 'NOK' else "",
+             Paragraph("Estado de Cebador", cell_style),
+             "X" if inspeccion.estado_cebador == 'OK' else "X" if inspeccion.estado_cebador == 'NOK' else ""],
             [Paragraph("Estado de Mangueras", cell_style),
-             "X" if inspeccion.estado_mangueras == 'OK' else "", "X" if inspeccion.estado_mangueras == 'NOK' else ""],
-            [Paragraph("Estado de Alarmas", cell_style),
-             "X" if inspeccion.estado_alarmas == 'OK' else "", "X" if inspeccion.estado_alarmas == 'NOK' else ""],
+             "X" if inspeccion.estado_mangueras == 'OK' else "X" if inspeccion.estado_mangueras == 'NOK' else "",
+             Paragraph("Estado de Alarmas", cell_style),
+             "X" if inspeccion.estado_alarmas == 'OK' else "X" if inspeccion.estado_alarmas == 'NOK' else ""],
             [Paragraph("Estado de Extintor", cell_style),
-             "X" if inspeccion.estado_extintor == 'OK' else "", "X" if inspeccion.estado_extintor == 'NOK' else ""],
-            [Paragraph("Estado de Puertas", cell_style),
-             "X" if inspeccion.estado_puertas == 'OK' else "", "X" if inspeccion.estado_puertas == 'NOK' else ""],
+             "X" if inspeccion.estado_extintor == 'OK' else "X" if inspeccion.estado_extintor == 'NOK' else "",
+             Paragraph("Estado de Puertas", cell_style),
+             "X" if inspeccion.estado_puertas == 'OK' else "X" if inspeccion.estado_puertas == 'NOK' else ""],
             [Paragraph("Estado de Baterías", cell_style),
-             "X" if inspeccion.estado_baterias == 'OK' else "", "X" if inspeccion.estado_baterias == 'NOK' else ""],
-            [Paragraph("Estado de Ventilador", cell_style),
-             "X" if inspeccion.estado_ventilador == 'OK' else "", "X" if inspeccion.estado_ventilador == 'NOK' else ""],
+             "X" if inspeccion.estado_baterias == 'OK' else "X" if inspeccion.estado_baterias == 'NOK' else "",
+             Paragraph("Estado de Ventilador", cell_style),
+             "X" if inspeccion.estado_ventilador == 'OK' else "X" if inspeccion.estado_ventilador == 'NOK' else ""],
         ]
         
-        tabla_breaker = Table(datos_breaker, colWidths=[3.5*inch, 0.8*inch, 0.8*inch])
+        tabla_breaker = Table(datos_breaker, colWidths=[2.2*inch, 0.9*inch, 2.2*inch, 0.7*inch])
         tabla_breaker.setStyle(TableStyle([
-            ('SPAN', (0,0), (2,0)),
+            ('SPAN', (0,0), (3,0)),
+            ('SPAN', (0,1), (1,1)),
+            ('SPAN', (2,1), (2,1)),
             ('ALIGN', (0,0), (-1,0), 'CENTER'),
             ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
             ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#0033a0')),
             ('TEXTCOLOR', (0,1), (-1,1), colors.white),
-            ('ALIGN', (1,1), (2,-1), 'CENTER'),
+            ('ALIGN', (1,2), (1,-1), 'CENTER'),
+            ('ALIGN', (3,2), (3,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
             ('FONTSIZE', (0,0), (-1,-1), 9),
             ('GRID', (0,0), (-1,-1), 1, colors.black),
             ('TOPPADDING', (0,0), (-1,-1), 6),
             ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('ALIGN', (0,2), (0,-1), 'LEFT'),
+            ('ALIGN', (2,2), (2,-1), 'LEFT'),
         ]))
         elementos.append(tabla_breaker)
         
@@ -2416,51 +2441,58 @@ def generar_pdf(id, tipo=None):
         elementos.append(tabla_obs_fotos_breaker)
         elementos.append(Spacer(1, 0.2*inch))
         
-        # ==================== ESTRUCTURAS, CHASIS Y OTROS ====================
+                # ==================== ESTRUCTURAS, CHASIS Y OTROS ====================
         titulo_estructuras = Paragraph("Estructuras, Chasis y Otros", 
                                        ParagraphStyle('TituloEstGE', parent=normal_style,
                                                      alignment=TA_CENTER, fontSize=12,
                                                      textColor=colors.HexColor("#000000"),
                                                      fontName='Helvetica-Bold'))
         
+        # Tabla con 4 columnas como las anteriores
         datos_estructuras = [
-            [titulo_estructuras, "", ""],
-            [Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style)],
+            [titulo_estructuras, "", "", ""],
+            [Paragraph("<b>Ítem</b>", cell_style), Paragraph("", cell_style), 
+             Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style)],
             [Paragraph("Limpieza General", cell_style),
-             "X" if inspeccion.limpieza_general == 'OK' else "", "X" if inspeccion.limpieza_general == 'NOK' else ""],
-            [Paragraph("Estado de Chasis", cell_style),
-             "X" if inspeccion.estado_chasis == 'OK' else "", "X" if inspeccion.estado_chasis == 'NOK' else ""],
-            [Paragraph(f"Cantidad de Cuñas: {inspeccion.cantidad_cunas or '-'}", cell_style), "", ""],
+             "X" if inspeccion.limpieza_general == 'OK' else "X" if inspeccion.limpieza_general == 'NOK' else "",
+             Paragraph("Estado de Chasis", cell_style),
+             "X" if inspeccion.estado_chasis == 'OK' else "X" if inspeccion.estado_chasis == 'NOK' else ""],
             [Paragraph("Checkpoints", cell_style),
-             "X" if inspeccion.checkpoints == 'OK' else "", "X" if inspeccion.checkpoints == 'NOK' else ""],
-            [Paragraph("Presión de Neumáticos", cell_style),
-             "X" if inspeccion.presion_neumaticos == 'OK' else "", "X" if inspeccion.presion_neumaticos == 'NOK' else ""],
+             "X" if inspeccion.checkpoints == 'OK' else "X" if inspeccion.checkpoints == 'NOK' else "",
+             Paragraph("Presión de Neumáticos", cell_style),
+             "X" if inspeccion.presion_neumaticos == 'OK' else "X" if inspeccion.presion_neumaticos == 'NOK' else ""],
             [Paragraph("Estado de Jaula", cell_style),
-             "X" if inspeccion.estado_jaula == 'OK' else "", "X" if inspeccion.estado_jaula == 'NOK' else ""],
-            [Paragraph("Estado de Candados", cell_style),
-             "X" if inspeccion.estado_candados == 'OK' else "", "X" if inspeccion.estado_candados == 'NOK' else ""],
+             "X" if inspeccion.estado_jaula == 'OK' else "X" if inspeccion.estado_jaula == 'NOK' else "",
+             Paragraph("Estado de Candados", cell_style),
+             "X" if inspeccion.estado_candados == 'OK' else "X" if inspeccion.estado_candados == 'NOK' else ""],
             [Paragraph("Nivelación de Carro", cell_style),
-             "X" if inspeccion.nivelacion_carro == 'OK' else "", "X" if inspeccion.nivelacion_carro == 'NOK' else ""],
-            [Paragraph("Patas de Posicionamiento", cell_style),
-             "X" if inspeccion.patas_posicionamiento == 'OK' else "", "X" if inspeccion.patas_posicionamiento == 'NOK' else ""],
+             "X" if inspeccion.nivelacion_carro == 'OK' else "X" if inspeccion.nivelacion_carro == 'NOK' else "",
+             Paragraph("Patas de Posicionamiento", cell_style),
+             "X" if inspeccion.patas_posicionamiento == 'OK' else "X" if inspeccion.patas_posicionamiento == 'NOK' else ""],
             [Paragraph("Manivelas Izajes de Pata", cell_style),
-             "X" if inspeccion.manivelas_izajes == 'OK' else "", "X" if inspeccion.manivelas_izajes == 'NOK' else ""],
+             "X" if inspeccion.manivelas_izajes == 'OK' else "X" if inspeccion.manivelas_izajes == 'NOK' else "",
+             Paragraph(f"Cantidad de Cuñas: {inspeccion.cantidad_cunas or '-'}", cell_style), ""],
         ]
         
-        tabla_estructuras = Table(datos_estructuras, colWidths=[3.5*inch, 0.8*inch, 0.8*inch])
+        tabla_estructuras = Table(datos_estructuras, colWidths=[2.2*inch, 0.9*inch, 2.2*inch, 0.7*inch])
         tabla_estructuras.setStyle(TableStyle([
-            ('SPAN', (0,0), (2,0)),
+            ('SPAN', (0,0), (3,0)),
+            ('SPAN', (0,1), (1,1)),
+            ('SPAN', (2,1), (2,1)),
             ('ALIGN', (0,0), (-1,0), 'CENTER'),
             ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
             ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#0033a0')),
             ('TEXTCOLOR', (0,1), (-1,1), colors.white),
-            ('ALIGN', (1,1), (2,-1), 'CENTER'),
+            ('ALIGN', (1,2), (1,-1), 'CENTER'),
+            ('ALIGN', (3,2), (3,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
             ('FONTSIZE', (0,0), (-1,-1), 9),
             ('GRID', (0,0), (-1,-1), 1, colors.black),
             ('TOPPADDING', (0,0), (-1,-1), 6),
             ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('ALIGN', (0,2), (0,-1), 'LEFT'),
+            ('ALIGN', (2,2), (2,-1), 'LEFT'),
         ]))
         elementos.append(tabla_estructuras)
         
