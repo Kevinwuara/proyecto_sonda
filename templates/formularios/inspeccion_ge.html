@@ -434,43 +434,92 @@
                 </div>
                 </fieldset>   
                         <!-- Levantamiento de Fotografías -->
-            <fieldset>
+                        <fieldset>
                 <legend>📸 Levantamiento de Fotografías</legend>
 
                 <div class="fotos-grid">
                     <div class="foto-item">
                         <strong>1. Fotografía del estado del sitio previo al comienzo de trabajos</strong>
                         <input type="file" name="foto_lev_1" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_1 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>2. Fotografía del panel de control del generador auxiliar</strong>
                         <input type="file" name="foto_lev_2" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_2 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>3. Fotografía de neumáticos</strong>
                         <input type="file" name="foto_lev_3" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_3 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>4. Fotografía del GE Auxiliar al término de la mantención</strong>
                         <input type="file" name="foto_lev_4" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_4 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_4) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>5. Fotografía adicional 1</strong>
                         <input type="file" name="foto_lev_5" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_5 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_5) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>6. Fotografía adicional 2</strong>
                         <input type="file" name="foto_lev_6" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_6 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_6) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>7. Fotografía adicional 3</strong>
                         <input type="file" name="foto_lev_7" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_7 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_7) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                     <div class="foto-item">
                         <strong>8. Fotografía adicional 4</strong>
                         <input type="file" name="foto_lev_8" accept="image/*" class="form-control">
+                        {% if editando and inspeccion_ge.foto_lev_8 %}
+                            <div class="foto-existente">
+                                <small>Foto actual:</small>
+                                <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_lev_8) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                        {% endif %}
                     </div>
                 </div>
+                <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn-submit") }}
