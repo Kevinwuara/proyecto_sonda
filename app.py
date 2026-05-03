@@ -1376,10 +1376,11 @@ def editar_informe(id):
     
     fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
     return render_template(template, form=form, usuario=session['nombre'], 
-                          fecha=fecha_actual, fecha_iso=fecha_iso, 
-                          dia_turno=dia_turno, turno=turno, 
-                          estado_turno=estado_turno, editando=True, 
-                          id_inspeccion=id, inspeccion=inspeccion)
+                      fecha=fecha_actual, fecha_iso=fecha_iso, 
+                      dia_turno=dia_turno, turno=turno, 
+                      estado_turno=estado_turno, editando=True, 
+                      id_inspeccion=id, inspeccion=inspeccion,
+                      inspeccion_ge=inspeccion)
 
 @app.route('/borrar_informe/<int:id>')
 def borrar_informe(id):

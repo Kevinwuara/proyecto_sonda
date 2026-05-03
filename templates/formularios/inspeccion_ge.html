@@ -167,24 +167,43 @@
                     {{ form.observaciones.label }}
                     {{ form.observaciones(class="form-control", rows="3") }}
                 </div>
-
-                <!-- Sección de Fotografías -->
+                <!-- Fotografías de respaldos GE -->
+            <fieldset>
                 <div class="form-group">
-                    <label>📸 Fotografías de respaldo (máximo 3)</label>
-                    <div class="fotos-row">
-                        <div class="foto-item">
-                            <label>Foto 1</label>
-                            <input type="file" name="foto_1" accept="image/*" class="form-control">
-                        </div>
-                        <div class="foto-item">
-                            <label>Foto 2</label>
-                            <input type="file" name="foto_2" accept="image/*" class="form-control">
-                        </div>
-                        <div class="foto-item">
-                            <label>Foto 3</label>
-                            <input type="file" name="foto_3" accept="image/*" class="form-control">
-                        </div>
-                    </div>
+                <label>📸 Fotografías de respaldo (máximo 3)</label>
+                <div class="fotos-row">
+                <div class="foto-item">
+                <label>Foto 1</label>
+                <input type="file" name="foto_1" accept="image/*" class="form-control">
+                {% if editando and inspeccion_ge.foto_1 %}
+                <div class="foto-existente">
+                    <small>Foto actual:</small>
+                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                </div>
+                {% endif %}
+                </div>
+                <div class="foto-item">
+                <label>Foto 2</label>
+                <input type="file" name="foto_2" accept="image/*" class="form-control">
+                {% if editando and inspeccion_ge.foto_2 %}
+                <div class="foto-existente">
+                    <small>Foto actual:</small>
+                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                </div>
+                {% endif %}
+                </div>
+                <div class="foto-item">
+                <label>Foto 3</label>
+                <input type="file" name="foto_3" accept="image/*" class="form-control">
+                {% if editando and inspeccion_ge.foto_3 %}
+                <div class="foto-existente">
+                    <small>Foto actual:</small>
+                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                </div>
+                {% endif %}
+                </div>
+                </div>
+                <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
             </fieldset>
                         <!-- Estado Breaker y Baterías -->
@@ -274,22 +293,42 @@
                 </div>
 
                 <!-- Sección de Fotografías Breaker -->
+            <fieldset>
                 <div class="form-group">
-                    <label>📸 Fotografías de respaldo (máximo 3)</label>
-                    <div class="fotos-row">
-                        <div class="foto-item">
-                            <label>Foto Breaker 1</label>
-                            <input type="file" name="foto_breaker_1" accept="image/*" class="form-control">
-                        </div>
-                        <div class="foto-item">
-                            <label>Foto Breaker 2</label>
-                            <input type="file" name="foto_breaker_2" accept="image/*" class="form-control">
-                        </div>
-                        <div class="foto-item">
-                            <label>Foto Breaker 3</label>
-                            <input type="file" name="foto_breaker_3" accept="image/*" class="form-control">
-                        </div>
-                    </div>
+                <label>📸 Fotografías de respaldo (máximo 3)</label>
+                <div class="fotos-row">
+                <div class="foto-item">
+                <label>Foto Breaker 1</label>
+                <input type="file" name="foto_breaker_1" accept="image/*" class="form-control">
+                {% if editando and inspeccion_ge.foto_breaker_1 %}
+                <div class="foto-existente">
+                    <small>Foto actual:</small>
+                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_breaker_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                </div>
+                {% endif %}
+                </div>
+                <div class="foto-item">
+                <label>Foto Breaker 2</label>
+                <input type="file" name="foto_breaker_2" accept="image/*" class="form-control">
+                {% if editando and inspeccion_ge.foto_breaker_2 %}
+                <div class="foto-existente">
+                    <small>Foto actual:</small>
+                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_breaker_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                </div>
+                {% endif %}
+                </div>
+                <div class="foto-item">
+                <label>Foto Breaker 3</label>
+                <input type="file" name="foto_breaker_3" accept="image/*" class="form-control">
+                {% if editando and inspeccion_ge.foto_breaker_3 %}
+                <div class="foto-existente">
+                    <small>Foto actual:</small>
+                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_breaker_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                </div>
+                {% endif %}
+                </div>
+                </div>
+                <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
             </fieldset>
                         <!-- Estructuras, Chasis y Otros -->
@@ -355,26 +394,45 @@
                     {{ form.observaciones_estructuras.label }}
                     {{ form.observaciones_estructuras(class="form-control", rows="3") }}
                 </div>
-
-                <!-- Sección de Fotografías Estructuras -->
+                                <!-- Sección de Fotografías Estructuras -->
+            <fieldset> 
                 <div class="form-group">
                     <label>📸 Fotografías de respaldo (máximo 3)</label>
                     <div class="fotos-row">
                         <div class="foto-item">
                             <label>Foto Estructura 1</label>
                             <input type="file" name="foto_estructura_1" accept="image/*" class="form-control">
+                            {% if editando and inspeccion_ge.foto_estructura_1 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_estructura_1) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
                             <label>Foto Estructura 2</label>
                             <input type="file" name="foto_estructura_2" accept="image/*" class="form-control">
+                            {% if editando and inspeccion_ge.foto_estructura_2 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_estructura_2) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="foto-item">
                             <label>Foto Estructura 3</label>
                             <input type="file" name="foto_estructura_3" accept="image/*" class="form-control">
+                            {% if editando and inspeccion_ge.foto_estructura_3 %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion_ge.foto_estructura_3) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
+                    <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
-            </fieldset>
+                </fieldset>   
                         <!-- Levantamiento de Fotografías -->
             <fieldset>
                 <legend>📸 Levantamiento de Fotografías</legend>
@@ -448,5 +506,27 @@
             }
         });
     </script>
+    <script>
+    function abrirImagen(src) {
+        // Crear modal si no existe
+        let modal = document.getElementById('modalImagen');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modalImagen';
+            modal.className = 'modal-img';
+            modal.innerHTML = '<span class="close-modal">&times;</span><img class="modal-img-content" id="modalImg">';
+            document.body.appendChild(modal);
+            
+            // Cerrar modal al hacer clic
+            modal.onclick = function() {
+                modal.style.display = 'none';
+            }
+        }
+        
+        const modalImg = document.getElementById('modalImg');
+        modal.style.display = 'block';
+        modalImg.src = src;
+    }
+</script>
 </body>
 </html>
