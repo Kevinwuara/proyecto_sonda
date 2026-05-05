@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Desplazamiento COW - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Detalle Desplazamiento COW #{{ inspeccion.id }}</h1>
+            <p>Bienvenido, {{ usuario }} ({{ rol }})</p>
+            <a href="{{ url_for('ver_informes') }}" class="volver-btn">← Volver a Informes</a>
+        </div>
+
+        <!-- Estado del informe -->
+        <div class="estado-banner {{ inspeccion.estado }}">
+            <strong>Estado: {{ inspeccion.estado|upper }}</strong>
+            {% if inspeccion.estado == 'rechazado' and inspeccion.motivo_rechazo %}
+                <br>
+                <span class="motivo-rechazo-texto">Motivo: {{ inspeccion.motivo_rechazo }}</span>
+            {% endif %}
+        </div>
+
+        <!-- ==================== DATOS GENERALES ==================== -->
+        <fieldset>
+            <legend>📋 Datos Generales</legend>
+            <div class="detalle-grid">
+                <div><strong>Responsable:</strong> {{ inspeccion.responsable }}</div>
+                <div><strong>Fecha:</strong> {{ inspeccion.fecha }} (Día {{ inspeccion.dia_turno }})</div>
+                <div><strong>Sitio:</strong> {{ inspeccion.sitio.nombre_sitio if inspeccion.sitio else 'N/A' }}</div>
+                <div><strong>Tipo Desplazamiento:</strong> {{ inspeccion.tipo_desplazamiento }}</div>
+                <div><strong>Hora Inicio:</strong> {{ inspeccion.hora_inicio }}</div>
+                <div><strong>Hora Término:</strong> {{ inspeccion.hora_termino }}</div>
+            </div>
+        </fieldset>
+
+        <!-- ==================== OBSERVACIONES ==================== -->
+        <fieldset>
+            <legend>📝 Observaciones</legend>
+            <div class="observaciones">
+                {{ inspeccion.observaciones or 'Sin observaciones' }}
+            </div>
+        </fieldset>
+
+        <!-- ==================== FOTOGRAFÍAS (10 puntos) ==================== -->
+        <fieldset>
+            <legend>📸 Fotografías de Respaldo</legend>
+            <div class="fotos-grid-10">
+                {% for i in range(1, 11) %}
+                {% set foto_attr = 'foto_' ~ i %}
+                {% set foto = inspeccion[foto_attr] %}
+                <div class="foto-item">
+                    <strong>Foto {{ i }}:</strong>
+                    {% if foto %}
+                        <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="img-preview" onclick="abrirImagen(this.src)">
+                    {% else %}
+                        <p>Sin foto</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Botones de acción -->
+        <div class="acciones-detalle">
+            <a href="{{ url_for('editar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-editar">Editar Informe</a>
+            <a href="{{ url_for('borrar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">Borrar Informe</a>
+            {% if inspeccion.estado == 'aprobado' %}
+            <a href="{{ url_for('generar_pdf', id=inspeccion.id, tipo='desp') }}" class="btn-pdf" target="_blank">📄 Generar PDF</a>
+            {% endif %}
+            {% if rol == 'supervisor' and inspeccion.estado == 'pendiente' %}
+            <a href="{{ url_for('aprobar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-aprobar">Aprobar</a>
+            <a href="{{ url_for('rechazar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-rechazar">Rechazar</a>
+            {% endif %}
+            <a href="{{ url_for('ver_informes') }}" class="btn-volver">Volver a Informes</a>
+        </div>
+    </div>
+
+    <script>
+        function abrirImagen(src) {
+            let modal = document.getElementById('modalImagen');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalImagen';
+                modal.className = 'modal-img';
+                modal.innerHTML = '<span class="close-modal">&times;</span><img class="modal-img-content" id="modalImg">';
+                document.body.appendChild(modal);
+                
+                modal.onclick = function() {
+                    modal.style.display = 'none';
+                }
+            }
+            
+            const modalImg = document.getElementById('modalImg');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+    </script>
+</body>
+</html>

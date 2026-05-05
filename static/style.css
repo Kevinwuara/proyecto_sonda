@@ -731,3 +731,10 @@ small {
     border-radius: 4px;
     font-size: 0.8em;
 }
+
+/* Grid para 10 fotos (desplazamiento) */
+.fotos-grid-10 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}

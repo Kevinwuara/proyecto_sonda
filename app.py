@@ -1049,6 +1049,12 @@ def ver_informes():
         ge_inspecciones = InspeccionGE.query.order_by(InspeccionGE.fecha_registro.desc()).all()
     else:
         ge_inspecciones = InspeccionGE.query.filter_by(usuario_id=usuario_actual.id).order_by(InspeccionGE.fecha_registro.desc()).all()
+
+    # Obtener desplazamientos COW
+    if usuario_actual.rol == 'supervisor':
+        desp_inspecciones = DesplazamientoCOW.query.order_by(DesplazamientoCOW.fecha_registro.desc()).all()
+    else:
+        desp_inspecciones = DesplazamientoCOW.query.filter_by(usuario_id=usuario_actual.id).order_by(DesplazamientoCOW.fecha_registro.desc()).all()
     
     # Unificar y agregar tipo
     inspecciones_unificadas = []
@@ -1073,6 +1079,17 @@ def ver_informes():
             'responsable': ins.responsable,
             'estado': ins.estado
         })
+
+    for ins in desp_inspecciones:
+        inspecciones_unificadas.append({
+            'id': ins.id,
+            'tipo': 'desp',
+            'fecha': ins.fecha,
+            'dia_turno': ins.dia_turno,
+            'sitio': ins.sitio.nombre_sitio if ins.sitio else 'N/A',
+            'responsable': ins.responsable,
+            'estado': ins.estado
+        })
     
     # Ordenar por fecha descendente
     inspecciones_unificadas.sort(key=lambda x: x['fecha'], reverse=True)
@@ -1093,6 +1110,9 @@ def ver_informe(id):
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
         template = 'ver_informe_ge.html'
+    elif tipo == 'desp':
+        inspeccion = DesplazamientoCOW.query.get_or_404(id)
+        template = 'ver_desplazamiento.html'
     else:
         return "Tipo de informe no válido", 400
     
@@ -1115,6 +1135,8 @@ def aprobar_informe(id):
         inspeccion = InspeccionCOW.query.get_or_404(id)
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
+    elif tipo == 'desp':
+        inspeccion = DesplazamientoCOW.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
 
@@ -1137,6 +1159,8 @@ def rechazar_informe(id):
         inspeccion = InspeccionCOW.query.get_or_404(id)
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
+    elif tipo == 'desp':
+        inspeccion = DesplazamientoCOW.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
     
@@ -1169,6 +1193,14 @@ def editar_informe(id):
         inspeccion = InspeccionGE.query.get_or_404(id)
         form = InspeccionGEForm()
         template = 'formularios/inspeccion_ge.html'
+    elif tipo == 'desp':
+        inspeccion = DesplazamientoCOW.query.get_or_404(id)
+        from forms_desplazamiento import DesplazamientoCOWForm
+        form = DesplazamientoCOWForm()
+        template = 'formularios/desplazamiento.html'
+        # Cargar opciones de sitios
+        sitios = Sitio.query.filter_by(activo=True).all()
+        form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
     else:
         return "Tipo de informe no válido", 400
     
@@ -1395,6 +1427,23 @@ def editar_informe(id):
                         filepath = os.path.join('static/uploads', filename)
                         file.save(filepath)
                         setattr(inspeccion, f'foto_lev_{i}', filename)
+
+        elif tipo == 'desp':
+            # ==================== CAMPOS DESPLAZAMIENTO ====================
+            inspeccion.sitio_id = int(form.nombre_sitio.data)
+            inspeccion.tipo_desplazamiento = form.tipo_desplazamiento.data
+            inspeccion.observaciones = form.observaciones.data
+            
+            # Procesar fotos Desplazamiento (10)
+            for i in range(1, 11):
+                campo_foto = f'foto_{i}'
+                if campo_foto in request.files:
+                    file = request.files[campo_foto]
+                    if file and file.filename:
+                        filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_desp_edit_{i}.jpg")
+                        filepath = os.path.join('static/uploads', filename)
+                        file.save(filepath)
+                        setattr(inspeccion, f'foto_{i}', filename)
         
         # Cambiar estado a pendiente después de editar
         inspeccion.estado = 'pendiente'
@@ -1502,6 +1551,11 @@ def editar_informe(id):
             form.patas_posicionamiento.data = inspeccion.patas_posicionamiento
             form.manivelas_izajes.data = inspeccion.manivelas_izajes
             form.observaciones_estructuras.data = inspeccion.observaciones_estructuras
+
+        elif tipo == 'desp':
+            form.nombre_sitio.data = str(inspeccion.sitio_id) if inspeccion.sitio_id else ''
+            form.tipo_desplazamiento.data = inspeccion.tipo_desplazamiento
+            form.observaciones.data = inspeccion.observaciones
     
     fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
     return render_template(template, form=form, usuario=session['nombre'], 
@@ -1523,6 +1577,8 @@ def borrar_informe(id):
         inspeccion = InspeccionCOW.query.get_or_404(id)
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
+    elif tipo == 'desp':
+        inspeccion = DesplazamientoCOW.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
     
