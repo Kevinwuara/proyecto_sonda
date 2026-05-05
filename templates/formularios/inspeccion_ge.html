@@ -25,7 +25,7 @@
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
 
-                        <fieldset>
+                <fieldset>
                 <legend>📋 Datos Generales</legend>
 
                 <div class="form-row">
@@ -162,6 +162,7 @@
                         {{ form.cable_5p_4p(class="form-control") }}
                     </div>
                 </div>
+                
 
                 <div class="form-group">
                     {{ form.observaciones.label }}
@@ -206,6 +207,8 @@
                 <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
             </fieldset>
+            </fieldset>
+
                         <!-- Estado Breaker y Baterías -->
             <fieldset>
                 <legend>🔋 Estado Breaker y Baterías</legend>
@@ -331,6 +334,7 @@
                 <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
             </fieldset>
+            </fieldset>
                         <!-- Estructuras, Chasis y Otros -->
             <fieldset>
                 <legend>🏗️ Estructuras, Chasis y Otros</legend>
@@ -432,9 +436,10 @@
                     </div>
                     <small>Seleccione nuevas imágenes para reemplazar las existentes. Deje en blanco para mantener las actuales.</small>
                 </div>
-                </fieldset>   
+                </fieldset>
+                </fieldset> 
                         <!-- Levantamiento de Fotografías -->
-                        <fieldset>
+                <fieldset>
                 <legend>📸 Levantamiento de Fotografías</legend>
 
                 <div class="fotos-grid">
