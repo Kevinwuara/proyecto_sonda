@@ -2464,58 +2464,76 @@ def generar_pdf(id, tipo=None):
         elementos.append(tabla_obs_fotos_breaker)
         elementos.append(Spacer(1, 0.2*inch))
         
-                # ==================== ESTRUCTURAS, CHASIS Y OTROS ====================
+        # ==================== ESTRUCTURAS, CHASIS Y OTROS ====================
         titulo_estructuras = Paragraph("Estructuras, Chasis y Otros", 
-                                       ParagraphStyle('TituloEstGE', parent=normal_style,
-                                                     alignment=TA_CENTER, fontSize=12,
-                                                     textColor=colors.HexColor("#000000"),
-                                                     fontName='Helvetica-Bold'))
+                                        ParagraphStyle('TituloEstGE', parent=normal_style,
+                                                      alignment=TA_CENTER, fontSize=12,
+                                                      textColor=colors.HexColor("#000000"),
+                                                      fontName='Helvetica-Bold'))
         
-        # Tabla con 4 columnas como las anteriores
+        # Tabla con 6 columnas al estilo GE: [Campo1, OK, NOK, Campo2, OK, NOK]
         datos_estructuras = [
-            [titulo_estructuras, "", "", ""],
-            [Paragraph("<b>Ítem</b>", cell_style), Paragraph("", cell_style), 
-             Paragraph("<b>Ítem</b>", cell_style), Paragraph("<b>OK/NOK</b>", cell_style)],
-            [Paragraph("Limpieza General", cell_style),
-             "X" if inspeccion.limpieza_general == 'OK' else "X" if inspeccion.limpieza_general == 'NOK' else "",
-             Paragraph("Estado de Chasis", cell_style),
-             "X" if inspeccion.estado_chasis == 'OK' else "X" if inspeccion.estado_chasis == 'NOK' else ""],
-            [Paragraph("Checkpoints", cell_style),
-             "X" if inspeccion.checkpoints == 'OK' else "X" if inspeccion.checkpoints == 'NOK' else "",
-             Paragraph("Presión de Neumáticos", cell_style),
-             "X" if inspeccion.presion_neumaticos == 'OK' else "X" if inspeccion.presion_neumaticos == 'NOK' else ""],
-            [Paragraph("Estado de Jaula", cell_style),
-             "X" if inspeccion.estado_jaula == 'OK' else "X" if inspeccion.estado_jaula == 'NOK' else "",
-             Paragraph("Estado de Candados", cell_style),
-             "X" if inspeccion.estado_candados == 'OK' else "X" if inspeccion.estado_candados == 'NOK' else ""],
-            [Paragraph("Nivelación de Carro", cell_style),
-             "X" if inspeccion.nivelacion_carro == 'OK' else "X" if inspeccion.nivelacion_carro == 'NOK' else "",
-             Paragraph("Patas de Posicionamiento", cell_style),
-             "X" if inspeccion.patas_posicionamiento == 'OK' else "X" if inspeccion.patas_posicionamiento == 'NOK' else ""],
-            [Paragraph("Manivelas Izajes de Pata", cell_style),
-             "X" if inspeccion.manivelas_izajes == 'OK' else "X" if inspeccion.manivelas_izajes == 'NOK' else "",
-             Paragraph(f"Cantidad de Cuñas: {inspeccion.cantidad_cunas or '-'}", cell_style), ""],
+            # Fila 0: Título (combinado en 6 columnas)
+            [titulo_estructuras, "", "", "", "", ""],
+            # Fila 1: Encabezados OK y NOK
+            [Paragraph("", cell_style), Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style),
+             Paragraph("", cell_style), Paragraph("<b>OK</b>", cell_style), Paragraph("<b>NOK</b>", cell_style)],
+            # Fila 2
+            [Paragraph("<b>Limpieza General</b>", cell_style),
+             Paragraph("X" if inspeccion.limpieza_general == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.limpieza_general == 'NOK' else "", cell_style),
+             Paragraph("<b>Estado de Chasis</b>", cell_style),
+             Paragraph("X" if inspeccion.estado_chasis == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.estado_chasis == 'NOK' else "", cell_style)],
+            # Fila 3
+            [Paragraph("<b>Checkpoints</b>", cell_style),
+             Paragraph("X" if inspeccion.checkpoints == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.checkpoints == 'NOK' else "", cell_style),
+             Paragraph("<b>Presión de Neumáticos</b>", cell_style),
+             Paragraph("X" if inspeccion.presion_neumaticos == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.presion_neumaticos == 'NOK' else "", cell_style)],
+            # Fila 4
+            [Paragraph("<b>Estado de Jaula</b>", cell_style),
+             Paragraph("X" if inspeccion.estado_jaula == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.estado_jaula == 'NOK' else "", cell_style),
+             Paragraph("<b>Estado de Candados</b>", cell_style),
+             Paragraph("X" if inspeccion.estado_candados == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.estado_candados == 'NOK' else "", cell_style)],
+            # Fila 5
+            [Paragraph("<b>Nivelación de Carro</b>", cell_style),
+             Paragraph("X" if inspeccion.nivelacion_carro == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.nivelacion_carro == 'NOK' else "", cell_style),
+             Paragraph("<b>Patas de Posicionamiento</b>", cell_style),
+             Paragraph("X" if inspeccion.patas_posicionamiento == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.patas_posicionamiento == 'NOK' else "", cell_style)],
+            # Fila 6
+            [Paragraph("<b>Manivelas Izajes de Pata</b>", cell_style),
+             Paragraph("X" if inspeccion.manivelas_izajes == 'OK' else "", cell_style),
+             Paragraph("X" if inspeccion.manivelas_izajes == 'NOK' else "", cell_style),
+             Paragraph("<b>Cantidad de Cuñas</b>", cell_style),
+             Paragraph(str(inspeccion.cantidad_cunas or '-'), cell_style),
+             ""],
         ]
         
-        tabla_estructuras = Table(datos_estructuras, colWidths=[2.2*inch, 0.9*inch, 2.2*inch, 0.7*inch])
+        # Crear tabla con 6 columnas (mismo ancho que Estado Breaker)
+        tabla_estructuras = Table(datos_estructuras, colWidths=[2.5*inch, 0.5*inch, 0.5*inch, 2.5*inch, 0.5*inch, 0.5*inch])
         tabla_estructuras.setStyle(TableStyle([
-            ('SPAN', (0,0), (3,0)),
-            ('SPAN', (0,1), (1,1)),
-            ('SPAN', (2,1), (2,1)),
+            # Título combinado en la primera fila (6 columnas)
+            ('SPAN', (0,0), (5,0)),
             ('ALIGN', (0,0), (-1,0), 'CENTER'),
             ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
-            ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#0033a0')),
-            ('TEXTCOLOR', (0,1), (-1,1), colors.white),
-            ('ALIGN', (1,2), (1,-1), 'CENTER'),
-            ('ALIGN', (3,2), (3,-1), 'CENTER'),
+            # Estilos generales
+            ('ALIGN', (1,1), (2,-1), 'CENTER'),
+            ('ALIGN', (4,1), (5,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
             ('FONTSIZE', (0,0), (-1,-1), 9),
             ('GRID', (0,0), (-1,-1), 1, colors.black),
             ('TOPPADDING', (0,0), (-1,-1), 6),
             ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            # Alinear texto de la primera y cuarta columna a la izquierda
             ('ALIGN', (0,2), (0,-1), 'LEFT'),
-            ('ALIGN', (2,2), (2,-1), 'LEFT'),
+            ('ALIGN', (3,2), (3,-1), 'LEFT'),
         ]))
         elementos.append(tabla_estructuras)
         
