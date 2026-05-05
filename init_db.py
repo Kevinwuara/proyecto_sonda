@@ -13,7 +13,7 @@ with app.app_context():
             password=generate_password_hash('tec123'),
             nombre='Técnico Soporte 1C',
             rol='tecnico',
-            email='tecnico@sonda.cl'
+            email='kevin.alarcon@sonda.com'
         )
         
         # Crear usuario Supervisor

@@ -351,6 +351,47 @@ class InspeccionGE(db.Model):
     def __repr__(self):
         return f'<InspeccionGE {self.id} - {self.nombre_ge}>'
 
+    # Modelo de Desplazamiento COW
+class DesplazamientoCOW(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    sitio_id = db.Column(db.Integer, db.ForeignKey('sitio.id'), nullable=True)
+    fecha = db.Column(db.String(20), nullable=False)
+    dia_turno = db.Column(db.Integer, nullable=False)
+    
+    # Datos Generales
+    responsable = db.Column(db.String(50), nullable=False)
+    tipo_desplazamiento = db.Column(db.String(20), nullable=False)  # 'REPLIEGUE' o 'DESPLIEGUE'
+    hora_inicio = db.Column(db.String(10), nullable=False)
+    hora_termino = db.Column(db.String(10), nullable=False)
+    
+    # Observaciones
+    observaciones = db.Column(db.Text, nullable=True)
+    
+    # ==================== FOTOGRAFÍAS (10 puntos) ====================
+    foto_1 = db.Column(db.String(200), nullable=True)
+    foto_2 = db.Column(db.String(200), nullable=True)
+    foto_3 = db.Column(db.String(200), nullable=True)
+    foto_4 = db.Column(db.String(200), nullable=True)
+    foto_5 = db.Column(db.String(200), nullable=True)
+    foto_6 = db.Column(db.String(200), nullable=True)
+    foto_7 = db.Column(db.String(200), nullable=True)
+    foto_8 = db.Column(db.String(200), nullable=True)
+    foto_9 = db.Column(db.String(200), nullable=True)
+    foto_10 = db.Column(db.String(200), nullable=True)
+    
+    # Estado y control
+    estado = db.Column(db.String(20), default='pendiente')
+    motivo_rechazo = db.Column(db.String(500), nullable=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    usuario = db.relationship('Usuario', backref='desplazamientos')
+    sitio = db.relationship('Sitio', backref='desplazamientos')
+    
+    def __repr__(self):
+        return f'<DesplazamientoCOW {self.id} - {self.tipo_desplazamiento}>'
+
 @app.route('/calcular_turno', methods=['POST'])
 def calcular_turno():
     import json
@@ -890,11 +931,99 @@ def inspeccion_ge():
     fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
     return render_template('formularios/inspeccion_ge.html', form=form, usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
 
-@app.route('/desplazamiento')
+@app.route('/desplazamiento', methods=['GET', 'POST'])
 def desplazamiento():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('desplazamiento.html', usuario=session['nombre'], rol=session['rol'])
+    
+    from forms_desplazamiento import DesplazamientoCOWForm
+    form = DesplazamientoCOWForm()
+    
+    # Cargar opciones de sitios desde la base de datos
+    sitios = Sitio.query.filter_by(activo=True).all()
+    form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
+    
+    # Inicializar variables
+    fecha_actual = None
+    fecha_iso = None
+    dia_turno = None
+    turno = None
+    estado_turno = None
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        fecha_seleccionada = request.form.get('fecha')
+        if fecha_seleccionada:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno(fecha_seleccionada)
+        else:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+        
+        # Procesar fotos (10 fotos)
+        fotos_guardadas = []
+        for i in range(1, 11):
+            campo_foto = f'foto_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_desp_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_guardadas.append(filename)
+                else:
+                    fotos_guardadas.append(None)
+            else:
+                fotos_guardadas.append(None)
+        
+        # ==================== GUARDAR EN BASE DE DATOS ====================
+        usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+        
+        nuevo_desplazamiento = DesplazamientoCOW(
+            usuario_id=usuario_actual.id,
+            sitio_id=int(form.nombre_sitio.data),
+            fecha=fecha_actual,
+            dia_turno=dia_turno,
+            responsable=form.responsable.data,
+            tipo_desplazamiento=form.tipo_desplazamiento.data,
+            hora_inicio=form.hora_inicio.data,
+            hora_termino=form.hora_termino.data,
+            observaciones=form.observaciones.data,
+            foto_1=fotos_guardadas[0] if len(fotos_guardadas) > 0 and fotos_guardadas[0] else None,
+            foto_2=fotos_guardadas[1] if len(fotos_guardadas) > 1 and fotos_guardadas[1] else None,
+            foto_3=fotos_guardadas[2] if len(fotos_guardadas) > 2 and fotos_guardadas[2] else None,
+            foto_4=fotos_guardadas[3] if len(fotos_guardadas) > 3 and fotos_guardadas[3] else None,
+            foto_5=fotos_guardadas[4] if len(fotos_guardadas) > 4 and fotos_guardadas[4] else None,
+            foto_6=fotos_guardadas[5] if len(fotos_guardadas) > 5 and fotos_guardadas[5] else None,
+            foto_7=fotos_guardadas[6] if len(fotos_guardadas) > 6 and fotos_guardadas[6] else None,
+            foto_8=fotos_guardadas[7] if len(fotos_guardadas) > 7 and fotos_guardadas[7] else None,
+            foto_9=fotos_guardadas[8] if len(fotos_guardadas) > 8 and fotos_guardadas[8] else None,
+            foto_10=fotos_guardadas[9] if len(fotos_guardadas) > 9 and fotos_guardadas[9] else None,
+            estado='pendiente'
+        )
+        
+        db.session.add(nuevo_desplazamiento)
+        db.session.commit()
+        
+        print("=" * 50)
+        print("NUEVO DESPLAZAMIENTO COW")
+        print("=" * 50)
+        print(f"Fecha: {fecha_actual} - {estado_turno}")
+        print(f"Responsable: {form.responsable.data}")
+        print(f"Sitio: {form.nombre_sitio.data}")
+        print(f"Tipo: {form.tipo_desplazamiento.data}")
+        print(f"Hora Inicio: {form.hora_inicio.data} / Término: {form.hora_termino.data}")
+        print(f"Observaciones: {form.observaciones.data}")
+        print(f"Fotos guardadas: {sum(1 for f in fotos_guardadas if f)}")
+        print("=" * 50)
+        
+        mensaje = f"Desplazamiento COW guardado correctamente (ID: {nuevo_desplazamiento.id})"
+        return render_template('formularios/desplazamiento.html', form=form, mensaje=mensaje, 
+                               usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, 
+                               dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
+    
+    # GET request
+    fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+    return render_template('formularios/desplazamiento.html', form=form, usuario=session['nombre'], 
+                           fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, 
+                           turno=turno, estado_turno=estado_turno)
 
 @app.route('/monitoreo')
 def monitoreo():

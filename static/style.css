@@ -723,3 +723,11 @@ small {
     background-color: #28a745;
     color: white;
 }
+
+.tipo-desp {
+    background-color: #6c757d;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
