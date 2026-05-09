@@ -1220,7 +1220,6 @@ def editar_informe(id):
         inspeccion.fecha = fecha_actual
         inspeccion.dia_turno = dia_turno
         inspeccion.responsable = form.responsable.data
-        inspeccion.horometro = form.horometro.data
         inspeccion.hora_inicio = form.hora_inicio.data
         inspeccion.hora_termino = form.hora_termino.data
         
@@ -1454,7 +1453,6 @@ def editar_informe(id):
     # GET request - Cargar datos existentes en el formulario
     if request.method == 'GET':
         form.responsable.data = inspeccion.responsable
-        form.horometro.data = inspeccion.horometro
         form.hora_inicio.data = inspeccion.hora_inicio
         form.hora_termino.data = inspeccion.hora_termino
         
