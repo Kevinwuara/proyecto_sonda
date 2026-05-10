@@ -1725,12 +1725,19 @@ def generar_pdf(id, tipo=None):
                 tipo = 'ge'
                 inspeccion = inspeccion_ge
             else:
-                return "Inspección no encontrada", 404
+                inspeccion_desp = DesplazamientoCOW.query.get(id)
+                if inspeccion_desp:
+                    tipo = 'desp'
+                    inspeccion = inspeccion_desp
+                else:
+                    return "Inspección no encontrada", 404
     else:
         if tipo == 'cow':
             inspeccion = InspeccionCOW.query.get_or_404(id)
         elif tipo == 'ge':
             inspeccion = InspeccionGE.query.get_or_404(id)
+        elif tipo == 'desp':
+            inspeccion = DesplazamientoCOW.query.get_or_404(id)
         else:
             return "Tipo de inspección no válido", 400
     
@@ -2333,7 +2340,7 @@ def generar_pdf(id, tipo=None):
                     elementos.append(crear_tabla_mejora(desc or '', foto))
     
         # ==================== SI ES GE AUXILIAR ====================
-    else:  # tipo == 'ge'
+    elif tipo == 'ge':
         # ==================== ENCABEZADO ====================
         try:
             logo_nokia = Image('static/img/nokia_logo.png', width=1.5*inch, height=0.5*inch)
@@ -2821,6 +2828,143 @@ def generar_pdf(id, tipo=None):
             tabla = crear_tabla_foto_ge(titulo, foto_nombre)
             if tabla:
                 elementos.append(tabla)
+
+        # ==================== SI ES DESPLAZAMIENTO COW ====================
+    elif tipo == 'desp':
+        # ==================== ENCABEZADO ====================
+        try:
+            logo_nokia = Image('static/img/nokia_logo.png', width=1.5*inch, height=0.5*inch)
+        except:
+            logo_nokia = Paragraph("", normal_style)
+        
+        titulo_encabezado = Paragraph("DESPLAZAMIENTO COW", 
+                                       ParagraphStyle('EncabezadoStyle', parent=normal_style,
+                                                     alignment=TA_CENTER, fontSize=14, 
+                                                     textColor=colors.HexColor("#000000"),
+                                                     fontName='Helvetica-Bold'))
+        
+        try:
+            logo_sonda = Image('static/img/sonda_logo.png', width=1.5*inch, height=0.5*inch)
+        except:
+            logo_sonda = Paragraph("", normal_style)
+        
+        encabezado_tabla = Table([[logo_nokia, titulo_encabezado, logo_sonda]], 
+                                  colWidths=[2.0*inch, 3.0*inch, 2.0*inch])
+        encabezado_tabla.setStyle(TableStyle([
+            ('ALIGN', (0,0), (0,0), 'LEFT'),
+            ('ALIGN', (1,0), (1,0), 'CENTER'),
+            ('ALIGN', (2,0), (2,0), 'RIGHT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+            ('LEFTPADDING', (0,0), (-1,-1), 10),
+            ('RIGHTPADDING', (0,0), (-1,-1), 10),
+        ]))
+        elementos.append(encabezado_tabla)
+        elementos.append(Spacer(1, 0.2*inch))
+        
+        # ==================== DATOS GENERALES ====================
+        datos_principales = [
+            [Paragraph("<b>DATOS GENERALES</b>", titulo_tabla_style), ""],
+            [Paragraph(f"<b>Responsable:</b> {inspeccion.responsable}", cell_style),
+             Paragraph(f"<b>Fecha:</b> {inspeccion.fecha} (Día {inspeccion.dia_turno})", cell_style)],
+            [Paragraph(f"<b>Sitio:</b> {inspeccion.sitio.nombre_sitio if inspeccion.sitio else 'N/A'}", cell_style),
+             Paragraph(f"<b>Tipo Desplazamiento:</b> {inspeccion.tipo_desplazamiento}", cell_style)],
+            [Paragraph(f"<b>Hora Inicio:</b> {inspeccion.hora_inicio}", cell_style),
+             Paragraph(f"<b>Hora Término:</b> {inspeccion.hora_termino}", cell_style)],
+        ]
+        
+        tabla_principales = Table(datos_principales, colWidths=[3.5*inch, 3.5*inch])
+        tabla_principales.setStyle(TableStyle([
+            ('SPAN', (0,0), (1,0)),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ]))
+        elementos.append(tabla_principales)
+        elementos.append(Spacer(1, 0.2*inch))
+        
+        # ==================== OBSERVACIONES ====================
+        titulo_obs = Paragraph("Observaciones", 
+                               ParagraphStyle('TituloObsStyle', parent=normal_style,
+                                             alignment=TA_CENTER, fontSize=12,
+                                             textColor=colors.HexColor("#000000"),
+                                             fontName='Helvetica-Bold'))
+        
+        datos_obs = [
+            [titulo_obs],
+            [Paragraph(inspeccion.observaciones or 'Sin observaciones', cell_style)],
+        ]
+        
+        tabla_obs = Table(datos_obs, colWidths=[7.0*inch])
+        tabla_obs.setStyle(TableStyle([
+            ('SPAN', (0,0), (0,0)),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+            ('LEFTPADDING', (0,0), (-1,-1), 8),
+            ('RIGHTPADDING', (0,0), (-1,-1), 8),
+        ]))
+        elementos.append(tabla_obs)
+        elementos.append(Spacer(1, 0.2*inch))
+        
+        # ==================== FOTOGRAFÍAS (10 PUNTOS) ====================
+        titulo_fotos = Paragraph("Fotografías de Respaldo", 
+                                 ParagraphStyle('TituloFotosStyle', parent=normal_style,
+                                               alignment=TA_CENTER, fontSize=12,
+                                               textColor=colors.HexColor("#000000"),
+                                               fontName='Helvetica-Bold'))
+        
+        tabla_titulo_fotos = Table([[titulo_fotos]], colWidths=[7.0*inch])
+        tabla_titulo_fotos.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ]))
+        elementos.append(tabla_titulo_fotos)
+        
+        def crear_tabla_foto_desp(titulo, foto_nombre):
+            if not foto_nombre:
+                return None
+            ruta_foto = os.path.join('static/uploads', foto_nombre)
+            if not os.path.exists(ruta_foto):
+                return None
+            try:
+                img = Image(ruta_foto, width=5*inch, height=3*inch)
+                contenido_celda = [Paragraph(f"<b>{titulo}</b>", cell_style), img]
+                tabla_foto = Table([[contenido_celda]], colWidths=[7.0*inch])
+                tabla_foto.setStyle(TableStyle([
+                    ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                    ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                    ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                    ('FONTSIZE', (0,0), (-1,-1), 10),
+                    ('GRID', (0,0), (-1,-1), 1, colors.black),
+                    ('TOPPADDING', (0,0), (-1,-1), 8),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                    ('LEFTPADDING', (0,0), (-1,-1), 8),
+                    ('RIGHTPADDING', (0,0), (-1,-1), 8),
+                ]))
+                return tabla_foto
+            except:
+                return None
+        
+        # 10 fotos
+        for i in range(1, 11):
+            foto_nombre = getattr(inspeccion, f'foto_{i}', None)
+            tabla = crear_tabla_foto_desp(f"Foto {i}", foto_nombre)
+            if tabla:
+                elementos.append(tabla)
     
     # Construir PDF
     doc.build(elementos)
@@ -2829,8 +2973,10 @@ def generar_pdf(id, tipo=None):
     # Nombre del archivo
     if tipo == 'cow':
         nombre_sitio_pdf = inspeccion.sitio_ref.nombre_sitio if inspeccion.sitio_ref else 'sin_sitio'
-    else:
+    elif tipo == 'ge':
         nombre_sitio_pdf = inspeccion.nombre_ge or 'sin_sitio'
+    elif  tipo == 'desp':
+        nombre_sitio_pdf = inspeccion.sitio.nombre_sitio if inspeccion.sitio else 'sin_sitio'
     
     nombre_base = nombre_sitio_pdf.replace(" ", "_").replace("/", "_")[:50]
     filename = f"{nombre_base}_{inspeccion.fecha.replace('/', '-')}.pdf"
