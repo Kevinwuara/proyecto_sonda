@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo Noche - App SONDA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Monitoreo Noche</h1>
+            <a href="{{ url_for('menu') }}" class="volver-btn">← Volver al Menú</a>
+        </div>
+
+        {% if mensaje %}
+            <div class="alert-success">{{ mensaje }}</div>
+        {% endif %}
+        
+        {% if editando %}
+            <div class="alert-warning">
+                ⚠️ Estás editando el informe #{{ id_inspeccion }}. Los cambios lo dejarán en estado "Pendiente".
+            </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <!-- ==================== DATOS GENERALES ==================== -->
+            <fieldset>
+                <legend>📋 Datos Generales</legend>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.responsable.label }}
+                        {{ form.responsable(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.nombre_sitio.label }}
+                        {{ form.nombre_sitio(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha *</label>
+                        <input type="date" name="fecha" class="form-control" value="{{ fecha_iso }}" required>
+                        <small id="turno-info">Turno 7x7: {{ estado_turno }}</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.hora_inicio.label }}
+                        {{ form.hora_inicio(class="form-control", type="time", step="60") }}
+                        {% for error in form.hora_inicio.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.hora_termino.label }}
+                        {{ form.hora_termino(class="form-control", type="time", step="60") }}
+                        {% for error in form.hora_termino.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- ==================== 10 OBSERVACIONES CON FOTOS ==================== -->
+            <fieldset>
+                <legend>📝 Observaciones y Fotografías</legend>
+
+                <div class="observaciones-grid">
+                    {% for i in range(1, 11) %}
+                    <div class="observacion-item">
+                        <div class="form-group">
+                            <label>Observación {{ i }}</label>
+                            {% set campo_obs = 'observacion_' ~ i %}
+                            {{ form[campo_obs](class="form-control", rows="2", placeholder="Ingrese observación " ~ i ~ "...") }}
+                        </div>
+                        <div class="form-group">
+                            <label>Foto {{ i }}</label>
+                            <input type="file" name="foto_{{ i }}" accept="image/*" class="form-control">
+                            {% if editando %}
+                                {% set foto_attr = 'foto_' ~ i %}
+                                {% if inspeccion[foto_attr] %}
+                                <div class="foto-existente">
+                                    <small>Foto actual:</small>
+                                    <img src="{{ url_for('static', filename='uploads/' + inspeccion[foto_attr]) }}" class="img-preview-thumb" onclick="abrirImagen(this.src)">
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <small>Cada observación puede tener una fotografía asociada. Deje en blanco para mantener las actuales (en edición).</small>
+            </fieldset>
+
+            <div class="form-group">
+                {{ form.submit(class="btn-submit") }}
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Función para actualizar el turno cuando cambia la fecha
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInput = document.querySelector('input[name="fecha"]');
+            const turnoInfo = document.getElementById('turno-info');
+            
+            if (fechaInput) {
+                fechaInput.addEventListener('change', function() {
+                    const fechaSeleccionada = this.value;
+                    
+                    fetch('/calcular_turno', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({fecha: fechaSeleccionada})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.estado_turno) {
+                            turnoInfo.textContent = data.estado_turno;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            }
+        });
+
+        function abrirImagen(src) {
+            let modal = document.getElementById('modalImagen');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalImagen';
+                modal.className = 'modal-img';
+                modal.innerHTML = '<span class="close-modal">&times;</span><img class="modal-img-content" id="modalImg">';
+                document.body.appendChild(modal);
+                
+                modal.onclick = function() {
+                    modal.style.display = 'none';
+                }
+            }
+            
+            const modalImg = document.getElementById('modalImg');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+    </script>
+</body>
+</html>

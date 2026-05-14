@@ -724,12 +724,9 @@ small {
     color: white;
 }
 
-.tipo-desp {
+.tipo.desplazamiento {
     background-color: #6c757d;
     color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
 }
 
 /* Grid para 10 fotos (desplazamiento) */
@@ -737,4 +734,9 @@ small {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
+}
+
+.tipo.monitoreo {
+    background-color: #17a2b8;
+    color: white;
 }

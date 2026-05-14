@@ -392,6 +392,56 @@ class DesplazamientoCOW(db.Model):
     def __repr__(self):
         return f'<DesplazamientoCOW {self.id} - {self.tipo_desplazamiento}>'
 
+        # Modelo de Monitoreo Noche
+class MonitoreoNoche(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    sitio_id = db.Column(db.Integer, db.ForeignKey('sitio.id'), nullable=True)
+    fecha = db.Column(db.String(20), nullable=False)
+    dia_turno = db.Column(db.Integer, nullable=False)
+    
+    # Datos Generales
+    responsable = db.Column(db.String(50), nullable=False)
+    hora_inicio = db.Column(db.String(10), nullable=False)
+    hora_termino = db.Column(db.String(10), nullable=False)
+    
+    # ==================== 10 OBSERVACIONES CON SUS FOTOS ====================
+    # Observaciones (texto)
+    observacion_1 = db.Column(db.Text, nullable=True)
+    observacion_2 = db.Column(db.Text, nullable=True)
+    observacion_3 = db.Column(db.Text, nullable=True)
+    observacion_4 = db.Column(db.Text, nullable=True)
+    observacion_5 = db.Column(db.Text, nullable=True)
+    observacion_6 = db.Column(db.Text, nullable=True)
+    observacion_7 = db.Column(db.Text, nullable=True)
+    observacion_8 = db.Column(db.Text, nullable=True)
+    observacion_9 = db.Column(db.Text, nullable=True)
+    observacion_10 = db.Column(db.Text, nullable=True)
+    
+    # Fotografías (rutas)
+    foto_1 = db.Column(db.String(200), nullable=True)
+    foto_2 = db.Column(db.String(200), nullable=True)
+    foto_3 = db.Column(db.String(200), nullable=True)
+    foto_4 = db.Column(db.String(200), nullable=True)
+    foto_5 = db.Column(db.String(200), nullable=True)
+    foto_6 = db.Column(db.String(200), nullable=True)
+    foto_7 = db.Column(db.String(200), nullable=True)
+    foto_8 = db.Column(db.String(200), nullable=True)
+    foto_9 = db.Column(db.String(200), nullable=True)
+    foto_10 = db.Column(db.String(200), nullable=True)
+    
+    # Estado y control
+    estado = db.Column(db.String(20), default='pendiente')
+    motivo_rechazo = db.Column(db.String(500), nullable=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    usuario = db.relationship('Usuario', backref='monitoreos')
+    sitio = db.relationship('Sitio', backref='monitoreos')
+    
+    def __repr__(self):
+        return f'<MonitoreoNoche {self.id} - {self.responsable}>'
+
 @app.route('/calcular_turno', methods=['POST'])
 def calcular_turno():
     import json
@@ -1025,11 +1075,112 @@ def desplazamiento():
                            fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, 
                            turno=turno, estado_turno=estado_turno)
 
-@app.route('/monitoreo')
+@app.route('/monitoreo', methods=['GET', 'POST'])
 def monitoreo():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('monitoreo.html', usuario=session['nombre'], rol=session['rol'])
+    
+    from forms_monitoreo import MonitoreoNocheForm
+    form = MonitoreoNocheForm()
+    
+    # Cargar opciones de sitios desde la base de datos
+    sitios = Sitio.query.filter_by(activo=True).all()
+    form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
+    
+    # Inicializar variables
+    fecha_actual = None
+    fecha_iso = None
+    dia_turno = None
+    turno = None
+    estado_turno = None
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        fecha_seleccionada = request.form.get('fecha')
+        if fecha_seleccionada:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno(fecha_seleccionada)
+        else:
+            fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+        
+        # Procesar fotos (10 fotos)
+        fotos_guardadas = []
+        for i in range(1, 11):
+            campo_foto = f'foto_{i}'
+            if campo_foto in request.files:
+                file = request.files[campo_foto]
+                if file and file.filename:
+                    filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_mon_{i}.jpg")
+                    filepath = os.path.join('static/uploads', filename)
+                    file.save(filepath)
+                    fotos_guardadas.append(filename)
+                else:
+                    fotos_guardadas.append(None)
+            else:
+                fotos_guardadas.append(None)
+        
+        # Procesar observaciones (10 textos)
+        observaciones = []
+        for i in range(1, 11):
+            campo_obs = f'observacion_{i}'
+            obs_value = request.form.get(campo_obs, '')
+            observaciones.append(obs_value)
+        
+        # ==================== GUARDAR EN BASE DE DATOS ====================
+        usuario_actual = Usuario.query.filter_by(username=session['username']).first()
+        
+        nuevo_monitoreo = MonitoreoNoche(
+            usuario_id=usuario_actual.id,
+            sitio_id=int(form.nombre_sitio.data),
+            fecha=fecha_actual,
+            dia_turno=dia_turno,
+            responsable=form.responsable.data,
+            hora_inicio=form.hora_inicio.data,
+            hora_termino=form.hora_termino.data,
+            observacion_1=observaciones[0] if len(observaciones) > 0 else None,
+            observacion_2=observaciones[1] if len(observaciones) > 1 else None,
+            observacion_3=observaciones[2] if len(observaciones) > 2 else None,
+            observacion_4=observaciones[3] if len(observaciones) > 3 else None,
+            observacion_5=observaciones[4] if len(observaciones) > 4 else None,
+            observacion_6=observaciones[5] if len(observaciones) > 5 else None,
+            observacion_7=observaciones[6] if len(observaciones) > 6 else None,
+            observacion_8=observaciones[7] if len(observaciones) > 7 else None,
+            observacion_9=observaciones[8] if len(observaciones) > 8 else None,
+            observacion_10=observaciones[9] if len(observaciones) > 9 else None,
+            foto_1=fotos_guardadas[0] if len(fotos_guardadas) > 0 and fotos_guardadas[0] else None,
+            foto_2=fotos_guardadas[1] if len(fotos_guardadas) > 1 and fotos_guardadas[1] else None,
+            foto_3=fotos_guardadas[2] if len(fotos_guardadas) > 2 and fotos_guardadas[2] else None,
+            foto_4=fotos_guardadas[3] if len(fotos_guardadas) > 3 and fotos_guardadas[3] else None,
+            foto_5=fotos_guardadas[4] if len(fotos_guardadas) > 4 and fotos_guardadas[4] else None,
+            foto_6=fotos_guardadas[5] if len(fotos_guardadas) > 5 and fotos_guardadas[5] else None,
+            foto_7=fotos_guardadas[6] if len(fotos_guardadas) > 6 and fotos_guardadas[6] else None,
+            foto_8=fotos_guardadas[7] if len(fotos_guardadas) > 7 and fotos_guardadas[7] else None,
+            foto_9=fotos_guardadas[8] if len(fotos_guardadas) > 8 and fotos_guardadas[8] else None,
+            foto_10=fotos_guardadas[9] if len(fotos_guardadas) > 9 and fotos_guardadas[9] else None,
+            estado='pendiente'
+        )
+        
+        db.session.add(nuevo_monitoreo)
+        db.session.commit()
+        
+        print("=" * 50)
+        print("NUEVO MONITOREO NOCHE")
+        print("=" * 50)
+        print(f"Fecha: {fecha_actual} - {estado_turno}")
+        print(f"Responsable: {form.responsable.data}")
+        print(f"Sitio: {form.nombre_sitio.data}")
+        print(f"Hora Inicio: {form.hora_inicio.data} / Término: {form.hora_termino.data}")
+        print(f"Fotos guardadas: {sum(1 for f in fotos_guardadas if f)}")
+        print("=" * 50)
+        
+        mensaje = f"Monitoreo Noche guardado correctamente (ID: {nuevo_monitoreo.id})"
+        return render_template('formularios/monitoreo.html', form=form, mensaje=mensaje, 
+                               usuario=session['nombre'], fecha=fecha_actual, fecha_iso=fecha_iso, 
+                               dia_turno=dia_turno, turno=turno, estado_turno=estado_turno)
+    
+    # GET request
+    fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
+    return render_template('formularios/monitoreo.html', form=form, usuario=session['nombre'], 
+                           fecha=fecha_actual, fecha_iso=fecha_iso, dia_turno=dia_turno, 
+                           turno=turno, estado_turno=estado_turno)
 
 @app.route('/ver_informes')
 def ver_informes():
@@ -1056,8 +1207,15 @@ def ver_informes():
     else:
         desp_inspecciones = DesplazamientoCOW.query.filter_by(usuario_id=usuario_actual.id).order_by(DesplazamientoCOW.fecha_registro.desc()).all()
     
+    # Obtener monitoreos noche
+    if usuario_actual.rol == 'supervisor':
+        mon_inspecciones = MonitoreoNoche.query.order_by(MonitoreoNoche.fecha_registro.desc()).all()
+    else:
+        mon_inspecciones = MonitoreoNoche.query.filter_by(usuario_id=usuario_actual.id).order_by(MonitoreoNoche.fecha_registro.desc()).all()
+    
     # Unificar y agregar tipo
     inspecciones_unificadas = []
+    
     for ins in cow_inspecciones:
         inspecciones_unificadas.append({
             'id': ins.id,
@@ -1075,7 +1233,7 @@ def ver_informes():
             'tipo': 'ge',
             'fecha': ins.fecha,
             'dia_turno': ins.dia_turno,
-            'sitio': ins.nombre_ge,  # GE usa nombre_ge
+            'sitio': ins.nombre_ge,
             'responsable': ins.responsable,
             'estado': ins.estado
         })
@@ -1083,7 +1241,18 @@ def ver_informes():
     for ins in desp_inspecciones:
         inspecciones_unificadas.append({
             'id': ins.id,
-            'tipo': 'desp',
+            'tipo': 'desplazamiento',
+            'fecha': ins.fecha,
+            'dia_turno': ins.dia_turno,
+            'sitio': ins.sitio.nombre_sitio if ins.sitio else 'N/A',
+            'responsable': ins.responsable,
+            'estado': ins.estado
+        })
+    
+    for ins in mon_inspecciones:
+        inspecciones_unificadas.append({
+            'id': ins.id,
+            'tipo': 'monitoreo',
             'fecha': ins.fecha,
             'dia_turno': ins.dia_turno,
             'sitio': ins.sitio.nombre_sitio if ins.sitio else 'N/A',
@@ -1095,6 +1264,7 @@ def ver_informes():
     inspecciones_unificadas.sort(key=lambda x: x['fecha'], reverse=True)
     
     return render_template('ver_informes.html', usuario=session['nombre'], rol=session['rol'], inspecciones=inspecciones_unificadas)
+
 
 @app.route('/ver_informe/<int:id>')
 def ver_informe(id):
@@ -1110,9 +1280,12 @@ def ver_informe(id):
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
         template = 'ver_informe_ge.html'
-    elif tipo == 'desp':
+    elif tipo == 'desplazamiento':
         inspeccion = DesplazamientoCOW.query.get_or_404(id)
         template = 'ver_desplazamiento.html'
+    elif tipo == 'monitoreo':
+        inspeccion = MonitoreoNoche.query.get_or_404(id)
+        template = 'ver_monitoreo.html'
     else:
         return "Tipo de informe no válido", 400
     
@@ -1135,8 +1308,10 @@ def aprobar_informe(id):
         inspeccion = InspeccionCOW.query.get_or_404(id)
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
-    elif tipo == 'desp':
+    elif tipo == 'desplazamiento':
         inspeccion = DesplazamientoCOW.query.get_or_404(id)
+    elif tipo == 'monitoreo':
+        inspeccion = MonitoreoNoche.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
 
@@ -1159,8 +1334,10 @@ def rechazar_informe(id):
         inspeccion = InspeccionCOW.query.get_or_404(id)
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
-    elif tipo == 'desp':
+    elif tipo == 'desplazamiento':
         inspeccion = DesplazamientoCOW.query.get_or_404(id)
+    elif tipo == 'monitoreo':
+        inspeccion = MonitoreoNoche.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
     
@@ -1193,11 +1370,19 @@ def editar_informe(id):
         inspeccion = InspeccionGE.query.get_or_404(id)
         form = InspeccionGEForm()
         template = 'formularios/inspeccion_ge.html'
-    elif tipo == 'desp':
+    elif tipo == 'desplazamiento':
         inspeccion = DesplazamientoCOW.query.get_or_404(id)
         from forms_desplazamiento import DesplazamientoCOWForm
         form = DesplazamientoCOWForm()
         template = 'formularios/desplazamiento.html'
+        # Cargar opciones de sitios
+        sitios = Sitio.query.filter_by(activo=True).all()
+        form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
+    elif tipo == 'monitoreo':
+        inspeccion = MonitoreoNoche.query.get_or_404(id)
+        from forms_monitoreo import MonitoreoNocheForm
+        form = MonitoreoNocheForm()
+        template = 'formularios/monitoreo.html'
         # Cargar opciones de sitios
         sitios = Sitio.query.filter_by(activo=True).all()
         form.nombre_sitio.choices = [(str(s.id), s.nombre_sitio) for s in sitios]
@@ -1444,6 +1629,27 @@ def editar_informe(id):
                         file.save(filepath)
                         setattr(inspeccion, f'foto_{i}', filename)
         
+        elif tipo == 'mon':
+            # ==================== CAMPOS MONITOREO NOCHE ====================
+            inspeccion.sitio_id = int(form.nombre_sitio.data)
+            
+            # Procesar observaciones (10)
+            for i in range(1, 11):
+                campo_obs = f'observacion_{i}'
+                obs_value = request.form.get(campo_obs, '')
+                setattr(inspeccion, f'observacion_{i}', obs_value)
+            
+            # Procesar fotos Monitoreo (10)
+            for i in range(1, 11):
+                campo_foto = f'foto_{i}'
+                if campo_foto in request.files:
+                    file = request.files[campo_foto]
+                    if file and file.filename:
+                        filename = secure_filename(f"{session['username']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_mon_edit_{i}.jpg")
+                        filepath = os.path.join('static/uploads', filename)
+                        file.save(filepath)
+                        setattr(inspeccion, f'foto_{i}', filename)
+        
         # Cambiar estado a pendiente después de editar
         inspeccion.estado = 'pendiente'
         db.session.commit()
@@ -1554,6 +1760,15 @@ def editar_informe(id):
             form.nombre_sitio.data = str(inspeccion.sitio_id) if inspeccion.sitio_id else ''
             form.tipo_desplazamiento.data = inspeccion.tipo_desplazamiento
             form.observaciones.data = inspeccion.observaciones
+        
+        elif tipo == 'mon':
+            form.nombre_sitio.data = str(inspeccion.sitio_id) if inspeccion.sitio_id else ''
+            # Cargar observaciones (10)
+            for i in range(1, 11):
+                campo_obs = f'observacion_{i}'
+                obs_value = getattr(inspeccion, campo_obs, '')
+                if hasattr(form, campo_obs):
+                    getattr(form, campo_obs).data = obs_value
     
     fecha_actual, fecha_iso, dia_turno, turno, estado_turno = calcular_fecha_turno()
     return render_template(template, form=form, usuario=session['nombre'], 
@@ -1577,6 +1792,8 @@ def borrar_informe(id):
         inspeccion = InspeccionGE.query.get_or_404(id)
     elif tipo == 'desp':
         inspeccion = DesplazamientoCOW.query.get_or_404(id)
+    elif tipo == 'mon':
+        inspeccion = MonitoreoNoche.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
     
