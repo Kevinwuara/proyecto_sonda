@@ -64,14 +64,14 @@
 
         <!-- Botones de acción -->
         <div class="acciones-detalle">
-            <a href="{{ url_for('editar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-editar">Editar Informe</a>
-            <a href="{{ url_for('borrar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">Borrar Informe</a>
+            <a href="{{ url_for('editar_informe', id=inspeccion.id, tipo='desplazamiento') }}" class="btn-editar">Editar Informe</a>
+            <a href="{{ url_for('borrar_informe', id=inspeccion.id, tipo='desplazamiento') }}" class="btn-borrar" onclick="return confirm('¿Eliminar este informe?')">Borrar Informe</a>
             {% if inspeccion.estado == 'aprobado' %}
-            <a href="{{ url_for('generar_pdf', id=inspeccion.id, tipo='desp') }}" class="btn-pdf" target="_blank">📄 Generar PDF</a>
+            <a href="{{ url_for('generar_pdf', id=inspeccion.id, tipo='desplazamiento') }}" class="btn-pdf" target="_blank">📄 Generar PDF</a>
             {% endif %}
             {% if rol == 'supervisor' and inspeccion.estado == 'pendiente' %}
-            <a href="{{ url_for('aprobar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-aprobar">Aprobar</a>
-            <a href="{{ url_for('rechazar_informe', id=inspeccion.id, tipo='desp') }}" class="btn-rechazar">Rechazar</a>
+            <a href="{{ url_for('aprobar_informe', id=inspeccion.id, tipo='desplazamiento') }}" class="btn-aprobar">Aprobar</a>
+            <a href="{{ url_for('rechazar_informe', id=inspeccion.id, tipo='desplazamiento') }}" class="btn-rechazar">Rechazar</a>
             {% endif %}
             <a href="{{ url_for('ver_informes') }}" class="btn-volver">Volver a Informes</a>
         </div>

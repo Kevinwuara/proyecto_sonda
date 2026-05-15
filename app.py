@@ -1612,7 +1612,7 @@ def editar_informe(id):
                         file.save(filepath)
                         setattr(inspeccion, f'foto_lev_{i}', filename)
 
-        elif tipo == 'desp':
+        elif tipo == 'desplazamiento':
             # ==================== CAMPOS DESPLAZAMIENTO ====================
             inspeccion.sitio_id = int(form.nombre_sitio.data)
             inspeccion.tipo_desplazamiento = form.tipo_desplazamiento.data
@@ -1629,7 +1629,7 @@ def editar_informe(id):
                         file.save(filepath)
                         setattr(inspeccion, f'foto_{i}', filename)
         
-        elif tipo == 'mon':
+        elif tipo == 'monitoreo':
             # ==================== CAMPOS MONITOREO NOCHE ====================
             inspeccion.sitio_id = int(form.nombre_sitio.data)
             
@@ -1756,12 +1756,12 @@ def editar_informe(id):
             form.manivelas_izajes.data = inspeccion.manivelas_izajes
             form.observaciones_estructuras.data = inspeccion.observaciones_estructuras
 
-        elif tipo == 'desp':
+        elif tipo == 'desplazamiento':
             form.nombre_sitio.data = str(inspeccion.sitio_id) if inspeccion.sitio_id else ''
             form.tipo_desplazamiento.data = inspeccion.tipo_desplazamiento
             form.observaciones.data = inspeccion.observaciones
         
-        elif tipo == 'mon':
+        elif tipo == 'monitoreo':
             form.nombre_sitio.data = str(inspeccion.sitio_id) if inspeccion.sitio_id else ''
             # Cargar observaciones (10)
             for i in range(1, 11):
@@ -1790,9 +1790,9 @@ def borrar_informe(id):
         inspeccion = InspeccionCOW.query.get_or_404(id)
     elif tipo == 'ge':
         inspeccion = InspeccionGE.query.get_or_404(id)
-    elif tipo == 'desp':
+    elif tipo == 'desplazamiento':
         inspeccion = DesplazamientoCOW.query.get_or_404(id)
-    elif tipo == 'mon':
+    elif tipo == 'monitoreo':
         inspeccion = MonitoreoNoche.query.get_or_404(id)
     else:
         return "Tipo de informe no válido", 400
@@ -1930,7 +1930,7 @@ def generar_pdf(id, tipo=None):
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    # Detectar tipo de inspección
+        # Detectar tipo de inspección
     if tipo is None:
         inspeccion_cow = InspeccionCOW.query.get(id)
         if inspeccion_cow:
@@ -1944,17 +1944,24 @@ def generar_pdf(id, tipo=None):
             else:
                 inspeccion_desp = DesplazamientoCOW.query.get(id)
                 if inspeccion_desp:
-                    tipo = 'desp'
+                    tipo = 'desplazamiento'
                     inspeccion = inspeccion_desp
                 else:
-                    return "Inspección no encontrada", 404
+                    inspeccion_mon = MonitoreoNoche.query.get(id)
+                    if inspeccion_mon:
+                        tipo = 'monitoreo'
+                        inspeccion = inspeccion_mon
+                    else:
+                        return "Inspección no encontrada", 404
     else:
         if tipo == 'cow':
             inspeccion = InspeccionCOW.query.get_or_404(id)
         elif tipo == 'ge':
             inspeccion = InspeccionGE.query.get_or_404(id)
-        elif tipo == 'desp':
+        elif tipo == 'desplazamiento':
             inspeccion = DesplazamientoCOW.query.get_or_404(id)
+        elif tipo == 'monitoreo':
+            inspeccion = MonitoreoNoche.query.get_or_404(id)
         else:
             return "Tipo de inspección no válido", 400
     
@@ -3047,7 +3054,7 @@ def generar_pdf(id, tipo=None):
                 elementos.append(tabla)
 
         # ==================== SI ES DESPLAZAMIENTO COW ====================
-    elif tipo == 'desp':
+    elif tipo == 'desplazamiento':
         # ==================== ENCABEZADO ====================
         try:
             logo_nokia = Image('static/img/nokia_logo.png', width=1.5*inch, height=0.5*inch)
@@ -3182,6 +3189,131 @@ def generar_pdf(id, tipo=None):
             tabla = crear_tabla_foto_desp(f"Foto {i}", foto_nombre)
             if tabla:
                 elementos.append(tabla)
+
+                    # ==================== SI ES MONITOREO NOCHE ====================
+    elif tipo == 'monitoreo':
+        # ==================== ENCABEZADO ====================
+        try:
+            logo_nokia = Image('static/img/nokia_logo.png', width=1.5*inch, height=0.5*inch)
+        except:
+            logo_nokia = Paragraph("", normal_style)
+        
+        titulo_encabezado = Paragraph("MONITOREO NOCHE", 
+                                       ParagraphStyle('EncabezadoStyle', parent=normal_style,
+                                                     alignment=TA_CENTER, fontSize=14, 
+                                                     textColor=colors.HexColor("#000000"),
+                                                     fontName='Helvetica-Bold'))
+        
+        try:
+            logo_sonda = Image('static/img/sonda_logo.png', width=1.5*inch, height=0.5*inch)
+        except:
+            logo_sonda = Paragraph("", normal_style)
+        
+        encabezado_tabla = Table([[logo_nokia, titulo_encabezado, logo_sonda]], 
+                                  colWidths=[2.0*inch, 3.0*inch, 2.0*inch])
+        encabezado_tabla.setStyle(TableStyle([
+            ('ALIGN', (0,0), (0,0), 'LEFT'),
+            ('ALIGN', (1,0), (1,0), 'CENTER'),
+            ('ALIGN', (2,0), (2,0), 'RIGHT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+            ('LEFTPADDING', (0,0), (-1,-1), 10),
+            ('RIGHTPADDING', (0,0), (-1,-1), 10),
+        ]))
+        elementos.append(encabezado_tabla)
+        elementos.append(Spacer(1, 0.2*inch))
+        
+        # ==================== DATOS GENERALES ====================
+        datos_principales = [
+            [Paragraph("<b>DATOS GENERALES</b>", titulo_tabla_style), ""],
+            [Paragraph(f"<b>Responsable:</b> {inspeccion.responsable}", cell_style),
+             Paragraph(f"<b>Fecha:</b> {inspeccion.fecha} (Día {inspeccion.dia_turno})", cell_style)],
+            [Paragraph(f"<b>Nombre del Sitio:</b> {inspeccion.sitio.nombre_sitio if inspeccion.sitio else 'N/A'}", cell_style),
+             Paragraph(f"<b>Hora Inicio:</b> {inspeccion.hora_inicio}", cell_style)],
+            [Paragraph("", cell_style),
+             Paragraph(f"<b>Hora Término:</b> {inspeccion.hora_termino}", cell_style)],
+        ]
+        
+        tabla_principales = Table(datos_principales, colWidths=[3.5*inch, 3.5*inch])
+        tabla_principales.setStyle(TableStyle([
+            ('SPAN', (0,0), (1,0)),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ]))
+        elementos.append(tabla_principales)
+        elementos.append(Spacer(1, 0.2*inch))
+        
+        # ==================== OBSERVACIONES Y FOTOGRAFÍAS (10 items) ====================
+        titulo_items = Paragraph("Registro de Monitoreo", 
+                                 ParagraphStyle('TituloItemsStyle', parent=normal_style,
+                                               alignment=TA_CENTER, fontSize=12,
+                                               textColor=colors.HexColor("#000000"),
+                                               fontName='Helvetica-Bold'))
+        
+        tabla_titulo = Table([[titulo_items]], colWidths=[7.0*inch])
+        tabla_titulo.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ]))
+        elementos.append(tabla_titulo)
+        
+        def crear_tabla_item_monitoreo(numero, observacion, foto_nombre):
+            contenido_celda = []
+            
+            # Agregar observación
+            if observacion and observacion.strip():
+                contenido_celda.append(Paragraph(f"<b>Item {numero}:</b> {observacion}", cell_style))
+            else:
+                contenido_celda.append(Paragraph(f"<b>Item {numero}:</b> (Sin observación)", cell_style))
+            
+            # Agregar foto si existe
+            if foto_nombre:
+                ruta_foto = os.path.join('static/uploads', foto_nombre)
+                if os.path.exists(ruta_foto):
+                    try:
+                        img = Image(ruta_foto, width=5*inch, height=3*inch)
+                        contenido_celda.append(img)
+                    except:
+                        contenido_celda.append(Paragraph("(Error al cargar imagen)", cell_style))
+                else:
+                    contenido_celda.append(Paragraph("(No se encontró la imagen)", cell_style))
+            else:
+                contenido_celda.append(Paragraph("(Sin foto)", cell_style))
+            
+            tabla_item = Table([[contenido_celda]], colWidths=[7.0*inch])
+            tabla_item.setStyle(TableStyle([
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,0), (-1,-1), 10),
+                ('GRID', (0,0), (-1,-1), 1, colors.black),
+                ('TOPPADDING', (0,0), (-1,-1), 8),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                ('LEFTPADDING', (0,0), (-1,-1), 8),
+                ('RIGHTPADDING', (0,0), (-1,-1), 8),
+            ]))
+            return tabla_item
+        
+        # Generar los 10 items
+        for i in range(1, 11):
+            obs_attr = f'observacion_{i}'
+            foto_attr = f'foto_{i}'
+            observacion = getattr(inspeccion, obs_attr, None)
+            foto_nombre = getattr(inspeccion, foto_attr, None)
+            
+            # Solo mostrar si tiene observación o foto
+            if observacion or foto_nombre:
+                elementos.append(crear_tabla_item_monitoreo(i, observacion or '', foto_nombre))
     
     # Construir PDF
     doc.build(elementos)
@@ -3190,13 +3322,22 @@ def generar_pdf(id, tipo=None):
     # Nombre del archivo
     if tipo == 'cow':
         nombre_sitio_pdf = inspeccion.sitio_ref.nombre_sitio if inspeccion.sitio_ref else 'sin_sitio'
+        prefijo = "Mantencion_COW"
     elif tipo == 'ge':
         nombre_sitio_pdf = inspeccion.nombre_ge or 'sin_sitio'
-    elif  tipo == 'desp':
+        prefijo = "GE_Auxiliar"
+    elif tipo == 'desplazamiento':
         nombre_sitio_pdf = inspeccion.sitio.nombre_sitio if inspeccion.sitio else 'sin_sitio'
+        prefijo = "Desplazamiento"
+    elif tipo == 'monitoreo':
+        nombre_sitio_pdf = inspeccion.sitio.nombre_sitio if inspeccion.sitio else 'sin_sitio'
+        prefijo = "Monitoreo"
+    else:
+        nombre_sitio_pdf = 'sin_sitio'
+        prefijo = "Informe"
     
     nombre_base = nombre_sitio_pdf.replace(" ", "_").replace("/", "_")[:50]
-    filename = f"{nombre_base}_{inspeccion.fecha.replace('/', '-')}.pdf"
+    filename = f"{prefijo}_{nombre_base}_{inspeccion.fecha.replace('/', '-')}.pdf"
     
     return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
