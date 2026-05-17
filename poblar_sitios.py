@@ -18,6 +18,7 @@ def poblar_sitios():
         ("COW 20 LIGHT (Esperanza Sur) Área Convencional", "Área Convencional", "LIGHT", "Esperanza Sur"),
         ("COW 21 LIGHT (Esperanza Sur) Área Autónoma", "Área Autónoma", "LIGHT", "Esperanza Sur"),
         ("COW 22 LIGHT (Esperanza sur) Área Autónoma", "Área Autónoma", "LIGHT", "Esperanza Sur"),
+        ("COW 23 LIGHT (Esperanza sur) Área Autónoma", "Área Autónoma", "LIGHT", "Esperanza Sur"),
     ]
     
     with app.app_context():
