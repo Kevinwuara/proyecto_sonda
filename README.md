@@ -1,25 +1,27 @@
-# Sistema Web de Inspección SONDA
+Sistema Web de Inspección SONDA
 
-Sistema web para gestión digital de inspecciones de equipos de telecomunicaciones (COW, GE Auxiliar, Desplazamiento).
+Descripción
+Sistema web para gestión digital de inspecciones de equipos de telecomunicaciones (COW, GE Auxiliar, Desplazamiento, Monitoreo Noche).
 
-## Tecnologías
-- Python + Flask
-- SQLite + SQLAlchemy
-- HTML + CSS (responsive)
+Tecnologías
+- Backend: Flask (Python)
+- Frontend: HTML5, CSS3, Jinja2
+- Base de datos: SQLite
+- Seguridad: Werkzeug (cifrado), sesiones Flask
 
-## Acceso
+Acceso al sistema (Hosting)
+🌐 URL: https://proyecto-sonda.onrender.com/login
 
-**URL:** `http://127.0.0.1:5000` (ejecutar localmente)
-
-### Credenciales
+Credenciales de acceso
 | Perfil | Usuario | Contraseña |
 |--------|---------|-------------|
-| Técnico | tecnico | tec123 |
-| Supervisor | supervisor | sup123 |
+| Técnico | `tecnico` | `tec123` |
+| Supervisor | `supervisor` | `sup123` |
 
-## Instalación
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
+Estructura de Base de Datos
+- Modelo relacional en 3FN
+- 9+ tablas: usuario, sitio, inspeccion_cow, inspeccion_ge, desplazamiento_cow, monitoreo_noche, fotografia, mejora, estados_inspeccion
+- Scripts en `/database/`
+
+Autor
+Kevin Angelo Alberto Alarcón Iturra
